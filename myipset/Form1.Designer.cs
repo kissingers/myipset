@@ -63,10 +63,11 @@
             this.删除ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.traceMessage = new System.Windows.Forms.ListBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.buttonMAC_change = new System.Windows.Forms.Button();
+            this.buttonMAC_Random = new System.Windows.Forms.Button();
             this.textBoxMAC = new System.Windows.Forms.TextBox();
             this.buttonMAC_restore = new System.Windows.Forms.Button();
             this.button_showroute = new System.Windows.Forms.Button();
+            this.buttonMAC_Self = new System.Windows.Forms.Button();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -388,16 +389,16 @@
             this.label1.TabIndex = 32;
             this.label1.Text = "默认及保存的方案:";
             // 
-            // buttonMAC_change
+            // buttonMAC_Random
             // 
-            this.buttonMAC_change.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.buttonMAC_change.Location = new System.Drawing.Point(2, 59);
-            this.buttonMAC_change.Name = "buttonMAC_change";
-            this.buttonMAC_change.Size = new System.Drawing.Size(100, 29);
-            this.buttonMAC_change.TabIndex = 33;
-            this.buttonMAC_change.Text = "随机MAC";
-            this.buttonMAC_change.UseVisualStyleBackColor = true;
-            this.buttonMAC_change.Click += new System.EventHandler(this.ButtonMAC_change_Click);
+            this.buttonMAC_Random.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.buttonMAC_Random.Location = new System.Drawing.Point(-2, 61);
+            this.buttonMAC_Random.Name = "buttonMAC_Random";
+            this.buttonMAC_Random.Size = new System.Drawing.Size(100, 28);
+            this.buttonMAC_Random.TabIndex = 33;
+            this.buttonMAC_Random.Text = "随机MAC";
+            this.buttonMAC_Random.UseVisualStyleBackColor = true;
+            this.buttonMAC_Random.Click += new System.EventHandler(this.ButtonMAC_change_Click);
             // 
             // textBoxMAC
             // 
@@ -412,12 +413,13 @@
             // buttonMAC_restore
             // 
             this.buttonMAC_restore.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.buttonMAC_restore.Location = new System.Drawing.Point(308, 60);
+            this.buttonMAC_restore.Location = new System.Drawing.Point(393, 61);
             this.buttonMAC_restore.Name = "buttonMAC_restore";
-            this.buttonMAC_restore.Size = new System.Drawing.Size(93, 29);
+            this.buttonMAC_restore.Size = new System.Drawing.Size(93, 28);
             this.buttonMAC_restore.TabIndex = 35;
             this.buttonMAC_restore.Text = "恢复默认";
             this.buttonMAC_restore.UseVisualStyleBackColor = true;
+            this.buttonMAC_restore.Click += new System.EventHandler(this.ButtonMAC_restore_Click);
             // 
             // button_showroute
             // 
@@ -431,15 +433,27 @@
             this.button_showroute.UseVisualStyleBackColor = false;
             this.button_showroute.Click += new System.EventHandler(this.Button_showroute_Click);
             // 
+            // buttonMAC_Self
+            // 
+            this.buttonMAC_Self.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.buttonMAC_Self.Location = new System.Drawing.Point(294, 61);
+            this.buttonMAC_Self.Name = "buttonMAC_Self";
+            this.buttonMAC_Self.Size = new System.Drawing.Size(93, 28);
+            this.buttonMAC_Self.TabIndex = 35;
+            this.buttonMAC_Self.Text = "手动MAC";
+            this.buttonMAC_Self.UseVisualStyleBackColor = true;
+            this.buttonMAC_Self.Click += new System.EventHandler(this.ButtonMAC_Self_Click);
+            // 
             // Form1
             // 
             this.AcceptButton = this.buttonapply;
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
             this.ClientSize = new System.Drawing.Size(936, 553);
             this.Controls.Add(this.button_showroute);
+            this.Controls.Add(this.buttonMAC_Self);
             this.Controls.Add(this.buttonMAC_restore);
             this.Controls.Add(this.textBoxMAC);
-            this.Controls.Add(this.buttonMAC_change);
+            this.Controls.Add(this.buttonMAC_Random);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.traceMessage);
             this.Controls.Add(this.FangAn);
@@ -511,11 +525,12 @@
         private System.Windows.Forms.Label label1;
         public System.Windows.Forms.ListBox FangAn;
         public System.Windows.Forms.TextBox textBoxip1;
-        private System.Windows.Forms.Button buttonMAC_change;
+        private System.Windows.Forms.Button buttonMAC_Random;
         public System.Windows.Forms.TextBox textBoxMAC;
         private System.Windows.Forms.Button buttonMAC_restore;
         private System.Windows.Forms.Button button_showroute;
         public System.Windows.Forms.ComboBox comboBoxnet;
+        private System.Windows.Forms.Button buttonMAC_Self;
     }
 }
 

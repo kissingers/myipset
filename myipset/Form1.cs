@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.IO;
 using Microsoft.Win32;
 using System.Linq;
+using System.Reflection;
 
 namespace myipset
 {
@@ -464,23 +465,49 @@ namespace myipset
             return true;
         }
 
-    
+        public void SetMACAddress(string nicName, string newMac)
+        {
+            //所有网卡物理信息所在位置
+            RegistryKey NetaddaptRegistry = Registry.LocalMachine.OpenSubKey("SYSTEM").OpenSubKey("CurrentControlSet")
+                .OpenSubKey("Control").OpenSubKey("Class").OpenSubKey("{4D36E972-E325-11CE-BFC1-08002bE10318}");
+            string[] subPatchNames = NetaddaptRegistry.GetSubKeyNames();    //获取所有子项名称
+            foreach (string PatchName in subPatchNames)
+            {
+                try
+                {
+                    //MessageBox.Show(PatchName);
+                    RegistryKey macRegistry = NetaddaptRegistry.OpenSubKey(PatchName, true);
+                    if (macRegistry.GetValue("DriverDesc", true).ToString() == nicName)
+                    {
+                        //MessageBox.Show("新的MAC地址为: "+ newMac);
+                        if (string.IsNullOrEmpty(newMac))
+                        { macRegistry.DeleteValue("NetworkAddress"); }
+                        else 
+                        { macRegistry.SetValue("NetworkAddress", newMac); }
+                        macRegistry.Close();
+                        break;
+                    }
+                    macRegistry.Close();
+                }
+                catch { }
+            }
+        }
+
         // 生成随机MAC地址
         public string CreateNewMacAddress()
         {
             int min = 0;
             int max = 15;
-            string MAC = "";
+            string MAC = "AA";
             Random rand = new Random();
-            for (int i=0; i<12;  i++)
+            for (int i=0; i<10;  i++)
             {
                 MAC += rand.Next(min, max).ToString("X");
             }
-            MessageBox.Show("新的随机MAC地址为: " + MAC);
+            //MessageBox.Show("新的随机MAC地址为: " + MAC);
             return MAC;
         }
 
-   
         // 网卡列表,这个方法只显示真的的物理网卡列表
         public void NetWorkList()
         {
@@ -1035,7 +1062,9 @@ namespace myipset
             FangAn.Items.Add("方案" + dat);
             FangAn.SetSelected(FangAn.Items.Count - 1, true);
 
-            Form2 f2 = new Form2(config) { Owner = this };
+            Form2 f2 = new Form2(config)
+            { Owner = this };
+
             f2.fangAnName.Text = this.FangAn.Text;
             f2.textBoxip1.Text = this.textBoxip1.Text;
             f2.textBoxmask1.Text = this.textBoxmask1.Text;
@@ -1063,6 +1092,7 @@ namespace myipset
             SelectNetCard();
             ChangeUI();
         }
+
  
         // 保存配置方案
         private void Buttonsaveconfig_Click(object sender, EventArgs e)
@@ -1089,7 +1119,41 @@ namespace myipset
 
         private void ButtonMAC_change_Click(object sender, EventArgs e)
         {
-           // SetMACAddress(IpClass.NicDescript, CreateNewMacAddress());  
+            DialogResult result = MessageBox.Show("更改MAC需重启网卡，网络将断开，IP可能会改变，确认更改？", "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (result == DialogResult.Yes)
+            {
+                SetMACAddress(IpClass.NicDescript, CreateNewMacAddress());
+                DisableNetWork(NetWork(comboBoxnet.SelectedValue.ToString()));
+                EnableNetWork(NetWork(comboBoxnet.SelectedValue.ToString()));
+                SelectNetCard();
+                ChangeUI();
+            }
+        }
+
+        private void ButtonMAC_restore_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show("更改MAC需重启网卡，网络将断开，IP可能会改变，确认更改？", "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (result == DialogResult.Yes)
+            {
+                SetMACAddress(IpClass.NicDescript, "");
+                DisableNetWork(NetWork(comboBoxnet.SelectedValue.ToString()));
+                EnableNetWork(NetWork(comboBoxnet.SelectedValue.ToString()));
+                SelectNetCard();
+                ChangeUI();
+            }
+        }
+
+        private void ButtonMAC_Self_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show("更改MAC需重启网卡，网络将断开，IP可能会改变，确认更改？", "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (result == DialogResult.Yes)
+            {
+                SetMACAddress(IpClass.NicDescript, textBoxMAC.Text);
+                DisableNetWork(NetWork(comboBoxnet.SelectedValue.ToString()));
+                EnableNetWork(NetWork(comboBoxnet.SelectedValue.ToString()));
+                SelectNetCard();
+                ChangeUI();
+            }
         }
     }
 
