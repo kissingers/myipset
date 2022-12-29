@@ -11,6 +11,8 @@ using System.IO;
 using Microsoft.Win32;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
+using System.Net.Sockets;
 
 namespace myipset
 {
@@ -1129,7 +1131,7 @@ namespace myipset
             ShowRoute();
         }
 
-        private void ButtonMAC_change_Click(object sender, EventArgs e)
+        private async void ButtonMAC_change_Click(object sender, EventArgs e)
         {
             DialogResult result = MessageBox.Show("网络将断开，IP可能会改变，不重启可能不生效，确认更改？", "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (result == DialogResult.Yes)
@@ -1137,12 +1139,12 @@ namespace myipset
                 SetMACAddress(IpClass.NicDescript, CreateNewMacAddress());
                 DisableNetWork(NetWork(comboBoxnet.SelectedValue.ToString()));
                 EnableNetWork(NetWork(comboBoxnet.SelectedValue.ToString()));
+                await Task.Run(() => Thread.Sleep(9000));
                 SelectNetCard();
-                ChangeUI();
             }
         }
 
-        private void ButtonMAC_restore_Click(object sender, EventArgs e)
+        private async void ButtonMAC_restore_Click(object sender, EventArgs e)
         {
             DialogResult result = MessageBox.Show("网络将断开，IP可能会改变，不重启可能不生效，确认更改？", "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (result == DialogResult.Yes)
@@ -1150,12 +1152,12 @@ namespace myipset
                 SetMACAddress(IpClass.NicDescript, "");
                 DisableNetWork(NetWork(comboBoxnet.SelectedValue.ToString()));
                 EnableNetWork(NetWork(comboBoxnet.SelectedValue.ToString()));
+                await Task.Run(() => Thread.Sleep(9000));
                 SelectNetCard();
-                ChangeUI();
             }
         }
 
-        private void ButtonMAC_Self_Click(object sender, EventArgs e)
+        private async void ButtonMAC_Self_Click(object sender, EventArgs e)
         {
             if (!CheckMacAddress(textBoxMAC.Text))
             {
@@ -1168,8 +1170,8 @@ namespace myipset
                 SetMACAddress(IpClass.NicDescript, textBoxMAC.Text);
                 DisableNetWork(NetWork(comboBoxnet.SelectedValue.ToString()));
                 EnableNetWork(NetWork(comboBoxnet.SelectedValue.ToString()));
+                await Task.Run(() => Thread.Sleep(9000));
                 SelectNetCard();
-                ChangeUI();
             }
         }
     }
