@@ -208,7 +208,7 @@ namespace myipset
             traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
         }
 
-        // 设置网卡ip地址第二种方法
+        // 设置网卡ip地址
         public bool SetNetworkAdapter()
         {
             //先判断ip是否合法
@@ -235,7 +235,7 @@ namespace myipset
                 traceMessage.Items.Add("运行命令 netsh interface ip set dns name =" + IpClass.NicName + " source = dhcp");
                 RunCommand("interface ip set address name =" + IpClass.NicName + " source = dhcp");
                 RunCommand("interface ip set dns name =" + IpClass.NicName + " source = dhcp");
-                traceMessage.Items.Add("---------------------修改网卡方法2dhcp结束-----------------------\r\n");
+                traceMessage.Items.Add("---------------------修改网卡结束-----------------------\r\n");
                 SelectNetCard();
                 ChangeUI();
                 traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
@@ -279,7 +279,7 @@ namespace myipset
                 RunCommand("interface ipv4 add dns name=\"" + IpClass.NicName + "\" addr=" + IpClass.setdns2);
             }
             if (!IpClass.NicConnect) MessageBox.Show("当前网卡未激活，设置为静态IP后，仍可能仍然显示为DHCP模式，且多一个169的未获取ip状态的地址，当点亮网卡时候自动生效！");
-            traceMessage.Items.Add("---------------------修改网卡方法2结束-----------------------\r\n");
+            traceMessage.Items.Add("---------------------修改网卡结束-----------------------\r\n");
             SelectNetCard();
             ChangeUI();
             traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
