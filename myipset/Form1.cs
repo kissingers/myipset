@@ -509,11 +509,9 @@ namespace myipset
         }
 
         //检查mac地址
-
-
         public bool CheckMacAddress(string MAC)
         {
-            string pattrn = @"(^[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]$)";
+            string pattrn = @"(^[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]$)";
             if (System.Text.RegularExpressions.Regex.IsMatch(MAC, pattrn))
                 return  true;
             else 
@@ -1133,7 +1131,7 @@ namespace myipset
 
         private void ButtonMAC_change_Click(object sender, EventArgs e)
         {
-            DialogResult result = MessageBox.Show("更改MAC需重启网卡，网络将断开，IP可能会改变，确认更改？", "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            DialogResult result = MessageBox.Show("网络将断开，IP可能会改变，不重启可能不生效，确认更改？", "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (result == DialogResult.Yes)
             {
                 SetMACAddress(IpClass.NicDescript, CreateNewMacAddress());
@@ -1146,7 +1144,7 @@ namespace myipset
 
         private void ButtonMAC_restore_Click(object sender, EventArgs e)
         {
-            DialogResult result = MessageBox.Show("更改MAC需重启网卡，网络将断开，IP可能会改变，确认更改？", "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            DialogResult result = MessageBox.Show("网络将断开，IP可能会改变，不重启可能不生效，确认更改？", "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (result == DialogResult.Yes)
             {
                 SetMACAddress(IpClass.NicDescript, "");
@@ -1164,7 +1162,7 @@ namespace myipset
                 MessageBox.Show("输入的MAC地址不合法，本次更改无效");
                 return;
             }
-            DialogResult result = MessageBox.Show("更改MAC需重启网卡，网络将断开，IP可能会改变，确认更改？", "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            DialogResult result = MessageBox.Show("网络将断开，IP可能会改变，不重启可能不生效，确认更改？", "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (result == DialogResult.Yes)
             {
                 SetMACAddress(IpClass.NicDescript, textBoxMAC.Text);
