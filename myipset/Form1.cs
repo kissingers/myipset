@@ -508,8 +508,22 @@ namespace myipset
             return MAC;
         }
 
-        // 网卡列表,这个方法只显示真的的物理网卡列表
-        public void NetWorkList()
+        //检查mac地址
+
+
+        public bool CheckMacAddress(string MAC)
+        {
+            string pattrn = @"(^[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]$)";
+            if (System.Text.RegularExpressions.Regex.IsMatch(MAC, pattrn))
+                return  true;
+            else 
+                return false;
+        }
+
+
+
+    // 网卡列表,这个方法只显示真的的物理网卡列表
+    public void NetWorkList()
         {
             string qry = "SELECT * FROM MSFT_NetAdapter WHERE Virtual=False";
             ManagementScope scope = new ManagementScope(@"\\.\ROOT\StandardCimv2");
@@ -1145,6 +1159,11 @@ namespace myipset
 
         private void ButtonMAC_Self_Click(object sender, EventArgs e)
         {
+            if (!CheckMacAddress(textBoxMAC.Text))
+            {
+                MessageBox.Show("输入的MAC地址不合法，本次更改无效");
+                return;
+            }
             DialogResult result = MessageBox.Show("更改MAC需重启网卡，网络将断开，IP可能会改变，确认更改？", "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (result == DialogResult.Yes)
             {
