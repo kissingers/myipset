@@ -28,12 +28,9 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             this.labelmask2 = new System.Windows.Forms.Label();
             this.textBoxmask2 = new System.Windows.Forms.TextBox();
-            this.buttonapply = new System.Windows.Forms.Button();
-            this.buttonsave = new System.Windows.Forms.Button();
-            this.buttonreflash = new System.Windows.Forms.Button();
+            this.buttonok = new System.Windows.Forms.Button();
             this.labelip2 = new System.Windows.Forms.Label();
             this.textBoxip2 = new System.Windows.Forms.TextBox();
             this.labeldns2 = new System.Windows.Forms.Label();
@@ -47,9 +44,8 @@
             this.textBoxmask1 = new System.Windows.Forms.TextBox();
             this.textBoxip1 = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
-
-            this.fangAnName = new System.Windows.Forms.TextBox();
-
+            this.fangAnName = new System.Windows.Forms.ComboBox();
+            this.buttoncancel = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // labelmask2
@@ -70,35 +66,16 @@
             this.textBoxmask2.Size = new System.Drawing.Size(188, 27);
             this.textBoxmask2.TabIndex = 37;
             // 
-            // buttonapply
+            // buttonok
             // 
-            this.buttonapply.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.buttonapply.Location = new System.Drawing.Point(222, 436);
-            this.buttonapply.Name = "buttonapply";
-            this.buttonapply.Size = new System.Drawing.Size(136, 30);
-            this.buttonapply.TabIndex = 45;
-            this.buttonapply.Text = "应用当前设置";
-            this.buttonapply.UseVisualStyleBackColor = true;
-            // 
-            // buttonsave
-            // 
-            this.buttonsave.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.buttonsave.Location = new System.Drawing.Point(222, 482);
-            this.buttonsave.Name = "buttonsave";
-            this.buttonsave.Size = new System.Drawing.Size(136, 30);
-            this.buttonsave.TabIndex = 44;
-            this.buttonsave.Text = "保存配置方案";
-            this.buttonsave.UseVisualStyleBackColor = true;
-            // 
-            // buttonreflash
-            // 
-            this.buttonreflash.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.buttonreflash.Location = new System.Drawing.Point(75, 436);
-            this.buttonreflash.Name = "buttonreflash";
-            this.buttonreflash.Size = new System.Drawing.Size(136, 29);
-            this.buttonreflash.TabIndex = 43;
-            this.buttonreflash.Text = "刷新当前配置";
-            this.buttonreflash.UseVisualStyleBackColor = true;
+            this.buttonok.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.buttonok.Location = new System.Drawing.Point(222, 482);
+            this.buttonok.Name = "buttonok";
+            this.buttonok.Size = new System.Drawing.Size(136, 30);
+            this.buttonok.TabIndex = 44;
+            this.buttonok.Text = "确认编辑";
+            this.buttonok.UseVisualStyleBackColor = true;
+            this.buttonok.Click += new System.EventHandler(this.Buttonok_Click);
             // 
             // labelip2
             // 
@@ -220,31 +197,36 @@
             this.label1.TabIndex = 47;
             this.label1.Text = "方案名字:";
             // 
-            // form1BindingSource
-            // 
-            // 
             // fangAnName
             // 
-            this.fangAnName.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
-            this.fangAnName.BackColor = System.Drawing.SystemColors.Window;
-            this.fangAnName.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.fangAnName.Location = new System.Drawing.Point(170, 29);
+            this.fangAnName.FormattingEnabled = true;
+            this.fangAnName.Location = new System.Drawing.Point(170, 38);
             this.fangAnName.Name = "fangAnName";
-            this.fangAnName.Size = new System.Drawing.Size(188, 27);
+            this.fangAnName.Size = new System.Drawing.Size(188, 22);
             this.fangAnName.TabIndex = 48;
+            // 
+            // buttoncancel
+            // 
+            this.buttoncancel.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.buttoncancel.Location = new System.Drawing.Point(75, 482);
+            this.buttoncancel.Name = "buttoncancel";
+            this.buttoncancel.Size = new System.Drawing.Size(136, 30);
+            this.buttoncancel.TabIndex = 49;
+            this.buttoncancel.Text = "取消";
+            this.buttoncancel.UseVisualStyleBackColor = true;
+            this.buttoncancel.Click += new System.EventHandler(this.Buttoncancel_Click);
             // 
             // Form2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(430, 556);
+            this.Controls.Add(this.buttoncancel);
             this.Controls.Add(this.fangAnName);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.labelmask2);
             this.Controls.Add(this.textBoxmask2);
-            this.Controls.Add(this.buttonapply);
-            this.Controls.Add(this.buttonsave);
-            this.Controls.Add(this.buttonreflash);
+            this.Controls.Add(this.buttonok);
             this.Controls.Add(this.labelip2);
             this.Controls.Add(this.textBoxip2);
             this.Controls.Add(this.labeldns2);
@@ -268,9 +250,7 @@
 
         private System.Windows.Forms.Label labelmask2;
         public System.Windows.Forms.TextBox textBoxmask2;
-        private System.Windows.Forms.Button buttonapply;
-        private System.Windows.Forms.Button buttonsave;
-        private System.Windows.Forms.Button buttonreflash;
+        private System.Windows.Forms.Button buttonok;
         private System.Windows.Forms.Label labelip2;
         public System.Windows.Forms.TextBox textBoxip2;
         private System.Windows.Forms.Label labeldns2;
@@ -284,6 +264,7 @@
         public System.Windows.Forms.TextBox textBoxmask1;
         private System.Windows.Forms.Label label1;
         public System.Windows.Forms.TextBox textBoxip1;
-        public System.Windows.Forms.TextBox fangAnName;
+        public System.Windows.Forms.ComboBox fangAnName;
+        private System.Windows.Forms.Button buttoncancel;
     }
 }

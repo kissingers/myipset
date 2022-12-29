@@ -46,14 +46,13 @@
             this.labelip2 = new System.Windows.Forms.Label();
             this.labelnetinfo = new System.Windows.Forms.Label();
             this.buttonreflash = new System.Windows.Forms.Button();
-            this.buttonsave = new System.Windows.Forms.Button();
+            this.buttonsaveconfig = new System.Windows.Forms.Button();
             this.buttonapply = new System.Windows.Forms.Button();
             this.textBoxmask2 = new System.Windows.Forms.TextBox();
             this.labelmask2 = new System.Windows.Forms.Label();
             this.checkBox2IP = new System.Windows.Forms.CheckBox();
             this.labelnicdes = new System.Windows.Forms.Label();
             this.buttonnicenable = new System.Windows.Forms.Button();
-            this.buttonnicmac = new System.Windows.Forms.Button();
             this.checkBoxDHCP = new System.Windows.Forms.CheckBox();
             this.FangAn = new System.Windows.Forms.ListBox();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -64,6 +63,10 @@
             this.删除ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.traceMessage = new System.Windows.Forms.ListBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.buttonMAC_change = new System.Windows.Forms.Button();
+            this.textBoxMAC = new System.Windows.Forms.TextBox();
+            this.buttonMAC_restore = new System.Windows.Forms.Button();
+            this.button_showroute = new System.Windows.Forms.Button();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -73,18 +76,17 @@
             this.networklabel.Font = new System.Drawing.Font("宋体", 11.89565F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.networklabel.Location = new System.Drawing.Point(-2, 9);
             this.networklabel.Name = "networklabel";
-            this.networklabel.Size = new System.Drawing.Size(100, 19);
+            this.networklabel.Size = new System.Drawing.Size(104, 20);
             this.networklabel.TabIndex = 1;
             this.networklabel.Text = "选择网卡:";
             // 
             // comboBoxnet
             // 
-            this.comboBoxnet.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.comboBoxnet.BackColor = System.Drawing.SystemColors.Info;
             this.comboBoxnet.Font = new System.Drawing.Font("宋体", 11.89565F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.comboBoxnet.Location = new System.Drawing.Point(101, 6);
+            this.comboBoxnet.Location = new System.Drawing.Point(104, 6);
             this.comboBoxnet.Name = "comboBoxnet";
-            this.comboBoxnet.Size = new System.Drawing.Size(180, 27);
+            this.comboBoxnet.Size = new System.Drawing.Size(188, 28);
             this.comboBoxnet.TabIndex = 11;
             this.comboBoxnet.SelectedIndexChanged += new System.EventHandler(this.ComboBoxNet_SelectedIndexChanged);
             // 
@@ -95,7 +97,7 @@
             this.textBoxip1.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.textBoxip1.Location = new System.Drawing.Point(104, 140);
             this.textBoxip1.Name = "textBoxip1";
-            this.textBoxip1.Size = new System.Drawing.Size(188, 27);
+            this.textBoxip1.Size = new System.Drawing.Size(188, 28);
             this.textBoxip1.TabIndex = 1;
             // 
             // textBoxmask1
@@ -103,7 +105,7 @@
             this.textBoxmask1.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.textBoxmask1.Location = new System.Drawing.Point(104, 175);
             this.textBoxmask1.Name = "textBoxmask1";
-            this.textBoxmask1.Size = new System.Drawing.Size(188, 27);
+            this.textBoxmask1.Size = new System.Drawing.Size(188, 28);
             this.textBoxmask1.TabIndex = 2;
             // 
             // textBoxgw
@@ -111,7 +113,7 @@
             this.textBoxgw.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.textBoxgw.Location = new System.Drawing.Point(104, 210);
             this.textBoxgw.Name = "textBoxgw";
-            this.textBoxgw.Size = new System.Drawing.Size(188, 27);
+            this.textBoxgw.Size = new System.Drawing.Size(188, 28);
             this.textBoxgw.TabIndex = 3;
             // 
             // labelip
@@ -149,7 +151,7 @@
             this.textBoxdns1.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.textBoxdns1.Location = new System.Drawing.Point(104, 277);
             this.textBoxdns1.Name = "textBoxdns1";
-            this.textBoxdns1.Size = new System.Drawing.Size(188, 27);
+            this.textBoxdns1.Size = new System.Drawing.Size(188, 28);
             this.textBoxdns1.TabIndex = 4;
             // 
             // textBoxdns2
@@ -157,7 +159,7 @@
             this.textBoxdns2.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.textBoxdns2.Location = new System.Drawing.Point(104, 312);
             this.textBoxdns2.Name = "textBoxdns2";
-            this.textBoxdns2.Size = new System.Drawing.Size(188, 27);
+            this.textBoxdns2.Size = new System.Drawing.Size(188, 28);
             this.textBoxdns2.TabIndex = 5;
             // 
             // labeldns1
@@ -185,7 +187,7 @@
             this.textBoxip2.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.textBoxip2.Location = new System.Drawing.Point(104, 388);
             this.textBoxip2.Name = "textBoxip2";
-            this.textBoxip2.Size = new System.Drawing.Size(188, 27);
+            this.textBoxip2.Size = new System.Drawing.Size(188, 28);
             this.textBoxip2.TabIndex = 6;
             // 
             // labelip2
@@ -201,16 +203,16 @@
             // labelnetinfo
             // 
             this.labelnetinfo.AutoSize = true;
-            this.labelnetinfo.Location = new System.Drawing.Point(559, 9);
+            this.labelnetinfo.Location = new System.Drawing.Point(490, 4);
             this.labelnetinfo.Name = "labelnetinfo";
-            this.labelnetinfo.Size = new System.Drawing.Size(105, 15);
+            this.labelnetinfo.Size = new System.Drawing.Size(75, 15);
             this.labelnetinfo.TabIndex = 16;
-            this.labelnetinfo.Text = "所有网卡信息:";
+            this.labelnetinfo.Text = "信息窗口:";
             // 
             // buttonreflash
             // 
             this.buttonreflash.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.buttonreflash.Location = new System.Drawing.Point(9, 504);
+            this.buttonreflash.Location = new System.Drawing.Point(9, 490);
             this.buttonreflash.Name = "buttonreflash";
             this.buttonreflash.Size = new System.Drawing.Size(136, 29);
             this.buttonreflash.TabIndex = 23;
@@ -218,20 +220,21 @@
             this.buttonreflash.UseVisualStyleBackColor = true;
             this.buttonreflash.Click += new System.EventHandler(this.Buttonreflash_Click);
             // 
-            // buttonsave
+            // buttonsaveconfig
             // 
-            this.buttonsave.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.buttonsave.Location = new System.Drawing.Point(156, 550);
-            this.buttonsave.Name = "buttonsave";
-            this.buttonsave.Size = new System.Drawing.Size(136, 30);
-            this.buttonsave.TabIndex = 23;
-            this.buttonsave.Text = "保存配置方案";
-            this.buttonsave.UseVisualStyleBackColor = true;
+            this.buttonsaveconfig.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.buttonsaveconfig.Location = new System.Drawing.Point(308, 490);
+            this.buttonsaveconfig.Name = "buttonsaveconfig";
+            this.buttonsaveconfig.Size = new System.Drawing.Size(136, 30);
+            this.buttonsaveconfig.TabIndex = 23;
+            this.buttonsaveconfig.Text = "保存配置方案";
+            this.buttonsaveconfig.UseVisualStyleBackColor = true;
+            this.buttonsaveconfig.Click += new System.EventHandler(this.Buttonsaveconfig_Click);
             // 
             // buttonapply
             // 
             this.buttonapply.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.buttonapply.Location = new System.Drawing.Point(156, 504);
+            this.buttonapply.Location = new System.Drawing.Point(156, 490);
             this.buttonapply.Name = "buttonapply";
             this.buttonapply.Size = new System.Drawing.Size(136, 30);
             this.buttonapply.TabIndex = 23;
@@ -244,7 +247,7 @@
             this.textBoxmask2.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.textBoxmask2.Location = new System.Drawing.Point(104, 421);
             this.textBoxmask2.Name = "textBoxmask2";
-            this.textBoxmask2.Size = new System.Drawing.Size(188, 27);
+            this.textBoxmask2.Size = new System.Drawing.Size(188, 28);
             this.textBoxmask2.TabIndex = 7;
             // 
             // labelmask2
@@ -263,7 +266,7 @@
             this.checkBox2IP.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.checkBox2IP.Location = new System.Drawing.Point(9, 360);
             this.checkBox2IP.Name = "checkBox2IP";
-            this.checkBox2IP.Size = new System.Drawing.Size(154, 22);
+            this.checkBox2IP.Size = new System.Drawing.Size(155, 22);
             this.checkBox2IP.TabIndex = 26;
             this.checkBox2IP.Text = "启用第二个IP:";
             this.checkBox2IP.UseVisualStyleBackColor = true;
@@ -272,7 +275,7 @@
             // labelnicdes
             // 
             this.labelnicdes.AutoSize = true;
-            this.labelnicdes.Location = new System.Drawing.Point(12, 41);
+            this.labelnicdes.Location = new System.Drawing.Point(5, 36);
             this.labelnicdes.Name = "labelnicdes";
             this.labelnicdes.Size = new System.Drawing.Size(67, 15);
             this.labelnicdes.TabIndex = 27;
@@ -282,23 +285,13 @@
             // 
             this.buttonnicenable.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.buttonnicenable.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.buttonnicenable.Location = new System.Drawing.Point(287, 4);
+            this.buttonnicenable.Location = new System.Drawing.Point(308, 4);
             this.buttonnicenable.Name = "buttonnicenable";
-            this.buttonnicenable.Size = new System.Drawing.Size(70, 29);
+            this.buttonnicenable.Size = new System.Drawing.Size(79, 29);
             this.buttonnicenable.TabIndex = 23;
             this.buttonnicenable.Text = "默认";
             this.buttonnicenable.UseVisualStyleBackColor = false;
             this.buttonnicenable.Click += new System.EventHandler(this.Buttonnicenable_Click);
-            // 
-            // buttonnicmac
-            // 
-            this.buttonnicmac.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.buttonnicmac.Location = new System.Drawing.Point(363, 4);
-            this.buttonnicmac.Name = "buttonnicmac";
-            this.buttonnicmac.Size = new System.Drawing.Size(70, 29);
-            this.buttonnicmac.TabIndex = 28;
-            this.buttonnicmac.Text = "改MAC";
-            this.buttonnicmac.UseVisualStyleBackColor = true;
             // 
             // checkBoxDHCP
             // 
@@ -306,7 +299,7 @@
             this.checkBoxDHCP.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.checkBoxDHCP.Location = new System.Drawing.Point(9, 112);
             this.checkBoxDHCP.Name = "checkBoxDHCP";
-            this.checkBoxDHCP.Size = new System.Drawing.Size(173, 22);
+            this.checkBoxDHCP.Size = new System.Drawing.Size(174, 22);
             this.checkBoxDHCP.TabIndex = 29;
             this.checkBoxDHCP.Text = "自动获取IP地址:";
             this.checkBoxDHCP.UseVisualStyleBackColor = true;
@@ -317,10 +310,10 @@
             this.FangAn.ContextMenuStrip = this.contextMenuStrip1;
             this.FangAn.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.FangAn.HorizontalScrollbar = true;
-            this.FangAn.ItemHeight = 17;
-            this.FangAn.Location = new System.Drawing.Point(298, 140);
+            this.FangAn.ItemHeight = 18;
+            this.FangAn.Location = new System.Drawing.Point(308, 140);
             this.FangAn.Name = "FangAn";
-            this.FangAn.Size = new System.Drawing.Size(148, 310);
+            this.FangAn.Size = new System.Drawing.Size(168, 310);
             this.FangAn.TabIndex = 30;
             this.FangAn.SelectedIndexChanged += new System.EventHandler(this.FangAn_SelectedIndexChanged);
             this.FangAn.DoubleClick += new System.EventHandler(this.FangAn_DoubleClick);
@@ -335,40 +328,40 @@
             this.新建ToolStripMenuItem,
             this.删除ToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(105, 114);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(109, 124);
             // 
             // 应用ToolStripMenuItem
             // 
             this.应用ToolStripMenuItem.Name = "应用ToolStripMenuItem";
-            this.应用ToolStripMenuItem.Size = new System.Drawing.Size(104, 22);
+            this.应用ToolStripMenuItem.Size = new System.Drawing.Size(108, 24);
             this.应用ToolStripMenuItem.Text = "应用";
             this.应用ToolStripMenuItem.Click += new System.EventHandler(this.应用ToolStripMenuItem_Click);
             // 
             // 编辑ToolStripMenuItem
             // 
             this.编辑ToolStripMenuItem.Name = "编辑ToolStripMenuItem";
-            this.编辑ToolStripMenuItem.Size = new System.Drawing.Size(104, 22);
+            this.编辑ToolStripMenuItem.Size = new System.Drawing.Size(108, 24);
             this.编辑ToolStripMenuItem.Text = "编辑";
             this.编辑ToolStripMenuItem.Click += new System.EventHandler(this.编辑ToolStripMenuItem_Click);
             // 
             // 参考ToolStripMenuItem
             // 
             this.参考ToolStripMenuItem.Name = "参考ToolStripMenuItem";
-            this.参考ToolStripMenuItem.Size = new System.Drawing.Size(104, 22);
+            this.参考ToolStripMenuItem.Size = new System.Drawing.Size(108, 24);
             this.参考ToolStripMenuItem.Text = "参考";
             this.参考ToolStripMenuItem.Click += new System.EventHandler(this.参考ToolStripMenuItem_Click);
             // 
             // 新建ToolStripMenuItem
             // 
             this.新建ToolStripMenuItem.Name = "新建ToolStripMenuItem";
-            this.新建ToolStripMenuItem.Size = new System.Drawing.Size(104, 22);
+            this.新建ToolStripMenuItem.Size = new System.Drawing.Size(108, 24);
             this.新建ToolStripMenuItem.Text = "新建";
             this.新建ToolStripMenuItem.Click += new System.EventHandler(this.新建ToolStripMenuItem_Click);
             // 
             // 删除ToolStripMenuItem
             // 
             this.删除ToolStripMenuItem.Name = "删除ToolStripMenuItem";
-            this.删除ToolStripMenuItem.Size = new System.Drawing.Size(104, 22);
+            this.删除ToolStripMenuItem.Size = new System.Drawing.Size(108, 24);
             this.删除ToolStripMenuItem.Text = "删除";
             this.删除ToolStripMenuItem.Click += new System.EventHandler(this.删除ToolStripMenuItem_Click);
             // 
@@ -379,39 +372,84 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.traceMessage.FormattingEnabled = true;
             this.traceMessage.HorizontalScrollbar = true;
-            this.traceMessage.ItemHeight = 14;
-            this.traceMessage.Location = new System.Drawing.Point(562, 41);
+            this.traceMessage.ItemHeight = 15;
+            this.traceMessage.Location = new System.Drawing.Point(493, 26);
             this.traceMessage.Name = "traceMessage";
-            this.traceMessage.Size = new System.Drawing.Size(393, 550);
+            this.traceMessage.Size = new System.Drawing.Size(431, 514);
             this.traceMessage.TabIndex = 31;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label1.Location = new System.Drawing.Point(295, 116);
+            this.label1.Location = new System.Drawing.Point(305, 113);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(151, 18);
+            this.label1.Size = new System.Drawing.Size(170, 18);
             this.label1.TabIndex = 32;
-            this.label1.Text = "系统及保存方案:";
-            this.label1.Click += new System.EventHandler(this.label1_Click);
+            this.label1.Text = "默认及保存的方案:";
+            // 
+            // buttonMAC_change
+            // 
+            this.buttonMAC_change.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.buttonMAC_change.Location = new System.Drawing.Point(2, 59);
+            this.buttonMAC_change.Name = "buttonMAC_change";
+            this.buttonMAC_change.Size = new System.Drawing.Size(100, 29);
+            this.buttonMAC_change.TabIndex = 33;
+            this.buttonMAC_change.Text = "随机MAC";
+            this.buttonMAC_change.UseVisualStyleBackColor = true;
+            this.buttonMAC_change.Click += new System.EventHandler(this.ButtonMAC_change_Click);
+            // 
+            // textBoxMAC
+            // 
+            this.textBoxMAC.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+            this.textBoxMAC.BackColor = System.Drawing.SystemColors.Window;
+            this.textBoxMAC.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.textBoxMAC.Location = new System.Drawing.Point(104, 61);
+            this.textBoxMAC.Name = "textBoxMAC";
+            this.textBoxMAC.Size = new System.Drawing.Size(188, 28);
+            this.textBoxMAC.TabIndex = 34;
+            // 
+            // buttonMAC_restore
+            // 
+            this.buttonMAC_restore.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.buttonMAC_restore.Location = new System.Drawing.Point(308, 60);
+            this.buttonMAC_restore.Name = "buttonMAC_restore";
+            this.buttonMAC_restore.Size = new System.Drawing.Size(93, 29);
+            this.buttonMAC_restore.TabIndex = 35;
+            this.buttonMAC_restore.Text = "恢复默认";
+            this.buttonMAC_restore.UseVisualStyleBackColor = true;
+            // 
+            // button_showroute
+            // 
+            this.button_showroute.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.button_showroute.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.button_showroute.Location = new System.Drawing.Point(393, 5);
+            this.button_showroute.Name = "button_showroute";
+            this.button_showroute.Size = new System.Drawing.Size(83, 29);
+            this.button_showroute.TabIndex = 36;
+            this.button_showroute.Text = "查路由";
+            this.button_showroute.UseVisualStyleBackColor = false;
+            this.button_showroute.Click += new System.EventHandler(this.Button_showroute_Click);
             // 
             // Form1
             // 
             this.AcceptButton = this.buttonapply;
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
-            this.ClientSize = new System.Drawing.Size(967, 602);
+            this.ClientSize = new System.Drawing.Size(936, 553);
+            this.Controls.Add(this.button_showroute);
+            this.Controls.Add(this.buttonMAC_restore);
+            this.Controls.Add(this.textBoxMAC);
+            this.Controls.Add(this.buttonMAC_change);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.traceMessage);
             this.Controls.Add(this.FangAn);
             this.Controls.Add(this.checkBoxDHCP);
-            this.Controls.Add(this.buttonnicmac);
             this.Controls.Add(this.labelnicdes);
             this.Controls.Add(this.checkBox2IP);
             this.Controls.Add(this.labelmask2);
             this.Controls.Add(this.textBoxmask2);
             this.Controls.Add(this.buttonapply);
-            this.Controls.Add(this.buttonsave);
+            this.Controls.Add(this.buttonsaveconfig);
             this.Controls.Add(this.buttonnicenable);
             this.Controls.Add(this.buttonreflash);
             this.Controls.Add(this.labelnetinfo);
@@ -442,7 +480,6 @@
 
         #endregion
         private System.Windows.Forms.Label networklabel;
-        private System.Windows.Forms.ComboBox comboBoxnet;
         public System.Windows.Forms.TextBox textBoxmask1;
         private System.Windows.Forms.TextBox textBoxgw;
         private System.Windows.Forms.Label labelip;
@@ -456,14 +493,13 @@
         private System.Windows.Forms.Label labelip2;
         private System.Windows.Forms.Label labelnetinfo;
         private System.Windows.Forms.Button buttonreflash;
-        private System.Windows.Forms.Button buttonsave;
+        private System.Windows.Forms.Button buttonsaveconfig;
         private System.Windows.Forms.Button buttonapply;
         private System.Windows.Forms.TextBox textBoxmask2;
         private System.Windows.Forms.Label labelmask2;
         private System.Windows.Forms.CheckBox checkBox2IP;
         private System.Windows.Forms.Label labelnicdes;
         private System.Windows.Forms.Button buttonnicenable;
-        private System.Windows.Forms.Button buttonnicmac;
         private System.Windows.Forms.CheckBox checkBoxDHCP;
         private System.Windows.Forms.ListBox traceMessage;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
@@ -475,6 +511,11 @@
         private System.Windows.Forms.Label label1;
         public System.Windows.Forms.ListBox FangAn;
         public System.Windows.Forms.TextBox textBoxip1;
+        private System.Windows.Forms.Button buttonMAC_change;
+        public System.Windows.Forms.TextBox textBoxMAC;
+        private System.Windows.Forms.Button buttonMAC_restore;
+        private System.Windows.Forms.Button button_showroute;
+        public System.Windows.Forms.ComboBox comboBoxnet;
     }
 }
 

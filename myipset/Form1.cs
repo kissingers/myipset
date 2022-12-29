@@ -8,7 +8,8 @@ using System.Net.NetworkInformation;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
-
+using Microsoft.Win32;
+using System.Linq;
 
 namespace myipset
 {
@@ -18,6 +19,8 @@ namespace myipset
         public Form1()
         {
             InitializeComponent();
+            IpClass.netConfigDict = new Dictionary<string, NetConfig>();
+            StartPosition = FormStartPosition.CenterScreen;        //程序居中
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -36,7 +39,7 @@ namespace myipset
 
         private void Buttonapply_Click(object sender, EventArgs e)
         {
-            SetNetworkAdapter2();
+            SetNetworkAdapter();
         }
 
         private void CheckBoxDHCP_CheckedChanged(object sender, EventArgs e)
@@ -48,7 +51,6 @@ namespace myipset
             ChangeUI();
         }
 
-
         private void CheckBox2IP_CheckedChanged(object sender, EventArgs e)
         {
             if (checkBox2IP.Checked)
@@ -58,9 +60,7 @@ namespace myipset
             ChangeUI();
         }
 
-        /// <summary>  
-        /// 显示网卡信息  
-        /// </summary>  
+        //显示网卡信息  
         public void ShowAdapterInfo()
         {
             NetworkInterface[] adapters = NetworkInterface.GetAllNetworkInterfaces();
@@ -70,7 +70,13 @@ namespace myipset
             foreach (NetworkInterface adapter in adapters)
             {
                 index++;
-                //显示网络适配器描述信息、名称、类型、速度、MAC 地址  
+
+                //如果网卡起来,且网卡类型为以太网,那么作为默认下拉修改的网卡
+                if ((adapter.OperationalStatus.ToString() == "Up") && (adapter.NetworkInterfaceType.ToString() == "Ethernet"))
+                {
+                    IpClass.NicDefaultName = adapter.Name;  
+                }
+                 //显示网络适配器描述信息、名称、类型、速度、MAC 地址  
                 traceMessage.Items.Add("------------------------第" + index + "个适配器信息------------------------");
                 traceMessage.Items.Add("网卡名字：" + adapter.Name);
                 traceMessage.Items.Add("网卡描述：" + adapter.Description);
@@ -78,16 +84,23 @@ namespace myipset
                 traceMessage.Items.Add("网卡类型：" + adapter.NetworkInterfaceType);
                 traceMessage.Items.Add("点亮情况：" + adapter.OperationalStatus);
                 traceMessage.Items.Add("网卡地址：" + adapter.GetPhysicalAddress());
-                if (adapter.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
-                    traceMessage.Items.Add("网卡类型：有线网卡");
-                if (adapter.NetworkInterfaceType == NetworkInterfaceType.Wireless80211)
-                    traceMessage.Items.Add("网卡类型：无线网卡");
                 traceMessage.Items.Add("网卡速度：" + adapter.Speed / 1000 / 1000 + "MB");
 
                 IPInterfaceProperties ip = adapter.GetIPProperties();
-                traceMessage.Items.Add("自动获取：" + (ip.GetIPv4Properties() == null ? false : ip.GetIPv4Properties().IsDhcpEnabled));
+ 
+                if (adapter.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
+                {
+                    traceMessage.Items.Add("网卡类型：有线网卡");
+                    traceMessage.Items.Add("自动获取：" + ip.GetIPv4Properties().IsDhcpEnabled);
+                }
+
+                if (adapter.NetworkInterfaceType == NetworkInterfaceType.Wireless80211)
+                {
+                    traceMessage.Items.Add("网卡类型：无线网卡");
+                    traceMessage.Items.Add("自动获取：" + ip.GetIPv4Properties().IsDhcpEnabled);
+                }
+
                 UnicastIPAddressInformationCollection netIpAdds = ip.UnicastAddresses;
-                IPInterfaceProperties adapterProperties = adapter.GetIPProperties();
                 foreach (UnicastIPAddressInformation ipadd in netIpAdds)
                 {
                     if (ipadd.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
@@ -109,9 +122,7 @@ namespace myipset
             traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
         }
 
-        /// <summary>  
-        /// 选择网卡下拉列表时候显示对应的网卡 
-        /// </summary> 
+        // 选择网卡下拉列表时候显示对应的网卡 
         public void SelectNetCard()
         {
             IpClass.NiceEnable = false;
@@ -138,9 +149,13 @@ namespace myipset
                 IpClass.NicName = adapter.Name;                 //如果匹配先保存网卡名字和描述到ip临时表
                 IpClass.NicDescript = adapter.Description;
                 IpClass.NicMAC = adapter.GetPhysicalAddress().ToString();
+                textBoxMAC.Text = IpClass.NicMAC;
                 IpClass.UseDhcp = ipstats.IsDhcpEnabled;
                 if (adapter.OperationalStatus == OperationalStatus.Up)
+                {
                     IpClass.NicConnect = true;
+                }
+
 
                 //处理IP和掩码,最多2组IPv4
                 int index1 = 0;
@@ -192,187 +207,8 @@ namespace myipset
             traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
         }
 
-
-        /// <summary>  
-        /// 选择网卡下拉列表时候显示对应的网卡 
-        /// </summary> 
-        public void SelectNetCard2()
-        {
-            IpClass.NiceEnable = false;
-            IpClass.UseDhcp = false;
-            IpClass.NicConnect = false;
-            IpClass.Use2Ip = false;
-
-            //string manage = "SELECT * From Win32_NetworkAdapter where PNPDeviceID LIKE 'PCI%";
-            string manage = "SELECT * From Win32_NetworkAdapter where PhysicalAdapter=1";
-            ManagementObjectSearcher searcher = new ManagementObjectSearcher(manage);
-            ManagementObjectCollection collection = searcher.Get();
-            foreach (ManagementObject obj in collection)
-            {
-                if (!(obj["NetConnectionID"].ToString() == comboBoxnet.SelectedValue.ToString()))
-                    continue;        //处理下拉列表,和前面读取的表项比较如果不匹配就继续匹配
-
-                labelnicdes.Text = obj["Name"].ToString();
-                IpClass.NiceEnable = (bool)obj["NetEnabled"];    //读取网卡是否起来的信息,保存网卡名字和描述到ip临时表等
-                IpClass.NicName = obj["NetConnectionID"].ToString();
-                IpClass.NicDescript = obj["Description"].ToString();
-                IpClass.NicMAC = obj["MacAddress"].ToString();
-                if (obj["NetConnectionStatus"].ToString() == "2")
-                    IpClass.NicConnect = true;
-
-                //处理IP和掩码,最多2组IPv4
-                textBoxip1.Text = "";
-                textBoxip2.Text = "";
-                textBoxmask1.Text = "";
-                textBoxmask2.Text = "";
-                textBoxgw.Text = "";
-                textBoxdns1.Text = "";
-                textBoxdns2.Text = "";
-
-                //下面两句等效再下面的三句,不过可以可以通过select先匹配
-                //string manageconfig = "SELECT * From Win32_NetworkAdapterConfiguration where Description=IpClass.NicDescript";
-                //ManagementObjectSearcher searcherconfig = new ManagementObjectSearcher(manageconfig);
-                //ManagementObjectCollection moc = searcherconfig.Get();
-
-                ManagementClass mc = new ManagementClass("Win32_NetworkAdapterConfiguration");
-                ManagementObjectCollection moc = mc.GetInstances();
-
-                foreach (ManagementObject mo in moc)
-                {
-                    if (mo["Description"] == obj["Name"])
-                    {
-                        IpClass.UseDhcp = (bool)mo["DHCPEnabled"];
-                        string[] tmp_ip = (string[])mo["IPAddress"];
-                        string[] tmp_mask = (string[])mo["IPSubnet"];
-                        string[] tmp_dns = (string[])mo["DNSServerSearchOrder"];
-
-                        foreach (string tmp1ip in tmp_ip)
-                        {
-                            traceMessage.Items.Add(tmp1ip);
-                        }
-
-                        foreach (string tmp1mask in tmp_mask)
-                        {
-                            traceMessage.Items.Add(tmp1mask);
-                        }
-
-                        foreach (string tmp1dns in tmp_dns)
-                        {
-                            traceMessage.Items.Add(tmp1dns);
-                        }
-                    }
-                }
-            }
-            traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
-        }
-
-
-
-
-        /// <summary>
-        /// 设置网卡ip地址
-        /// </summary>
+        // 设置网卡ip地址第二种方法
         public bool SetNetworkAdapter()
-        {
-            ManagementBaseObject inPar = null;
-            ManagementBaseObject outPar = null;
-            ManagementClass mc = new ManagementClass("Win32_NetworkAdapterConfiguration");
-            ManagementObjectCollection moc = mc.GetInstances();
-
-            foreach (ManagementObject mo in moc)
-            {
-                if (!(mo["Description"].Equals(IpClass.NicDescript)))    //网卡和选择的描述不相等就继续比较
-                    continue;
-
-                //如果匹配,则开始下面的修改过程，先把要改的网卡记录到信息表里面
-                traceMessage.Items.Add("修改网卡  " + mo["Description"] + "  IP地址等" + IpClass.setgw + IpClass.lastgw);
-
-                //先判断ip是否合法
-                if (IpClass.UseDhcp)
-                    IpClass.IpCheckOk = true;
-                else
-                    IpClass.IpCheckOk = Checkinput();
-
-                //不合法不重置输入界面直接退出
-                if (!IpClass.IpCheckOk)
-                {
-                    traceMessage.Items.Add("----------------需要修改的IP不符合规范,更改IP不成功----------------");
-                    traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
-                    return false;
-                }
-                //如果是地址是自动获取的,上面已经修改为dhcp模式了,完成任务直接结束
-                if (IpClass.UseDhcp)
-                {
-                    //mo.InvokeMethod("ReleaseDHCPLease", null);
-                    mo.InvokeMethod("EnableDHCP", null);
-                    mo.InvokeMethod("SetDNSServerSearchOrder", null);
-                    traceMessage.Items.Add("--------------------修改网卡自动获取结束---------------------\r\n");
-                    traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
-                    return true;
-                }
-
-                //现在网关是空白,但是下拉选择时候不是空白,就说明网关变了,通过dhcp模式清理下,否则不清理,避免网卡无故断开
-                if ((IpClass.setgw == "") && (IpClass.lastgw != ""))
-                {
-                    traceMessage.Items.Add("清理网卡 " + mo["Description"] + " 原来的地址  " + IpClass.lastgw);
-                    mo.InvokeMethod("EnableDHCP", null);
-                }
-
-                //如果ip和掩码都不为空,则设置ip地址和子网掩码 
-                if ((IpClass.setip1 != "") && (IpClass.setmask1 != ""))
-                {
-                    inPar = mo.GetMethodParameters("EnableStatic");
-                    //勾选双IP且第2个ip和掩码都不为空就设置2个ip,否则只设置1个IP(1个IP为空在校验函数中已经禁止为不允许了,所以这里不用校验)
-                    if ((IpClass.Use2Ip) && (IpClass.setip2 != "") && (IpClass.setmask2 != ""))
-                    {
-                        inPar["IPAddress"] = new string[] { IpClass.setip1, IpClass.setip2 };
-                        inPar["SubnetMask"] = new string[] { IpClass.setmask1, IpClass.setmask2 };
-                    }
-                    else
-                    {
-                        inPar["IPAddress"] = new string[] { IpClass.setip1 };
-                        inPar["SubnetMask"] = new string[] { IpClass.setmask1 };
-                    }
-                    //mo.InvokeMethod("EnableStatic", null);
-                    outPar = mo.InvokeMethod("EnableStatic", inPar, null);
-                    if (outPar["returnvalue"].ToString() == "0") traceMessage.Items.Add("IP修改成功"); else traceMessage.Items.Add("IP修改失败");
-                }
-
-                //如果网关不为空,则设置网关地址 
-                if (IpClass.setgw != "")
-                {
-                    inPar = mo.GetMethodParameters("SetGateways");
-                    inPar["DefaultIPGateway"] = new string[] { IpClass.setgw };  //如果设置和IP一致,增加个到自己的路由,官方推荐删除网关方法,但是不好
-                    outPar = mo.InvokeMethod("SetGateways", inPar, null);
-                    traceMessage.Items.Add("修改网卡 3 " + mo["Description"] + "  IP地址等" + IpClass.setgw + IpClass.lastgw);
-                    if (outPar.ToString() == "0") traceMessage.Items.Add("网关修改成功"); else traceMessage.Items.Add("网关修改成功");
-                }
-
-
-                //如果任意一个DNS非空,那么设置DNS
-                if ((IpClass.setdns1 != "") || (IpClass.setdns2 != ""))
-                {
-                    inPar = mo.GetMethodParameters("SetDNSServerSearchOrder");
-                    inPar["DNSServerSearchOrder"] = new string[] { IpClass.setdns1, IpClass.setdns2 }; //先假定都非空,dns字符串设置2个
-                    if (IpClass.setdns1 == "")
-                        inPar["DNSServerSearchOrder"] = new string[] { IpClass.setdns2 };              //如果dns1空则设置dns2
-                    if (IpClass.setdns2 == "")
-                        inPar["DNSServerSearchOrder"] = new string[] { IpClass.setdns1 };              //如果dns2空则设置dns1
-                    //mo.InvokeMethod("SetDNSServerSearchOrder", null);
-                    outPar = mo.InvokeMethod("SetDNSServerSearchOrder", inPar, null);
-                    if (outPar["returnvalue"].ToString() == "0") traceMessage.Items.Add("DNS修改成功"); else traceMessage.Items.Add("DNS修改失败");
-                }
-            }
-            traceMessage.Items.Add("-----------------------修改网卡结束-------------------------\r\n");
-            traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
-            return true;
-        }
-
-
-        /// <summary>
-        /// 设置网卡ip地址第二种方法
-        /// </summary>
-        public bool SetNetworkAdapter2()
         {
             //先判断ip是否合法
             if (IpClass.UseDhcp)
@@ -405,29 +241,29 @@ namespace myipset
                 return true;
             }
 
-            //如果ip、掩码和网关都不为空,则设置ip地址和子网掩码 
-            if ((IpClass.setip1 != "") && (IpClass.setmask1 != "") && (IpClass.setgw != ""))
+            //如果ip、掩码和网关都不为空,则设置ip地址和子网掩码和网关
+            if (!string.IsNullOrEmpty(IpClass.setip1) && !string.IsNullOrEmpty(IpClass.setmask1) && !string.IsNullOrEmpty(IpClass.setgw))
             {
                 traceMessage.Items.Add("interface ipv4 set address name=\"" + IpClass.NicName + "\" source =static addr=" + IpClass.setip1 + " mask=" + IpClass.setmask1 + " gateway=" + IpClass.setgw);
                 RunCommand("interface ipv4 set address name=\"" + IpClass.NicName + "\" source =static addr=" + IpClass.setip1 + " mask=" + IpClass.setmask1 + " gateway=" + IpClass.setgw);
             }
 
-            //如果ip和掩码都不为空，但是没网关，则设置ip地址和子网掩码 
-            if ((IpClass.setip1 != "") && (IpClass.setmask1 != "") && (IpClass.setgw == ""))
+            //如果ip和掩码都不为空，但是没网关，则设置ip地址和子网掩码
+            if (!string.IsNullOrEmpty(IpClass.setip1) && !string.IsNullOrEmpty(IpClass.setmask1) && string.IsNullOrEmpty(IpClass.setgw))
             {
                 traceMessage.Items.Add("interface ipv4 set address name=\"" + IpClass.NicName + "\" source =static addr=" + IpClass.setip1 + " mask=" + IpClass.setmask1);
                 RunCommand("interface ipv4 set address name=\"" + IpClass.NicName + "\" source =static addr=" + IpClass.setip1 + " mask=" + IpClass.setmask1);
             }
 
             //如果有第二个IP和掩码且不为空，则加入第二个IP和掩码
-            if ((IpClass.Use2Ip) && (IpClass.setip2 != "") && (IpClass.setmask2 != ""))
+            if ((IpClass.Use2Ip) && !string.IsNullOrEmpty(IpClass.setip2) && !string.IsNullOrEmpty(IpClass.setmask2))
             {
                 traceMessage.Items.Add("interface ipv4 add address name=" + IpClass.NicName + " addr=" + IpClass.setip2 + " mask=" + IpClass.setmask2);
                 RunCommand("interface ipv4 add address name=" + IpClass.NicName + " addr=" + IpClass.setip2 + " mask=" + IpClass.setmask2);
             }
 
             //如果任意一个DNS非空,那么设置DNS
-            if (IpClass.setdns1 != "")
+            if (!string.IsNullOrEmpty(IpClass.setdns1))
             {
                 traceMessage.Items.Add("interface ipv4 set dns name=\"" + IpClass.NicName + "\" source =static addr=" + IpClass.setdns1 + " register=primary");
                 RunCommand("interface ipv4 set dns name=\"" + IpClass.NicName + "\" source =static addr=" + IpClass.setdns1 + " register=primary");
@@ -436,7 +272,7 @@ namespace myipset
             {
                 RunCommand("interface ipv4 delete dns name=\"" + IpClass.NicName + "\" all");
             }
-            if (IpClass.setdns2 != "")
+            if (!string.IsNullOrEmpty(IpClass.setdns2 ))
             {
                 traceMessage.Items.Add("interface ipv4 add dns name=\"" + IpClass.NicName + "\" addr=" + IpClass.setdns2);
                 RunCommand("interface ipv4 add dns name=\"" + IpClass.NicName + "\" addr=" + IpClass.setdns2);
@@ -451,8 +287,8 @@ namespace myipset
 
         public bool CheckIP(string ip)
         {
-            //第一位在1到223之间 1-9  01-99   001-009      010-099  100-199 200-223        第二位0-99  000--199  200-249  250-255
-            string pattrn = @"^([1-9]|\d[1-9]|[0][0][1-9]|[0][1-9]\d|1\d\d|2[0-1]\d|22[0-3])\.(\d{1,2}|[0-1]\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|[0-1]\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|[0-1]\d\d|2[0-4]\d|25[0-5])$";
+            //第一位在1到223之间 1-9  10-99 100-199 200-219 220-223 第二位0-9 10-99 100--199 200-249 250-255
+            string pattrn = @"^([1-9]|[1-9]\d|1\d\d|2[0-1]\d|22[0-3])\.([0-9]|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.([0-9]|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.([0-9]|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])$";
             if (System.Text.RegularExpressions.Regex.IsMatch(ip, pattrn))
             {
                 traceMessage.Items.Add("这是合法的IP网关DNS地址：" + ip);
@@ -460,16 +296,12 @@ namespace myipset
             }
             else
             {
-                traceMessage.Items.Add("这是非法的IP网关DNS地址：" + ip);
+                traceMessage.Items.Add("这是非法的IP网关DNS地址,或去掉每一位最前面的0：" + ip);
                 return false;
             }
         }
 
-        /// <summary>
         /// 验证子网掩码正确性,最后一个1后面应该是全0
-        /// </summary>
-        /// <param name="mask"></param>
-        /// <returns></returns>
         public bool CheckMask(string mask)
         {
             string[] vList = mask.Split('.');
@@ -506,37 +338,9 @@ namespace myipset
             return true;
         }
 
-
-        /// <summary> 
-        /// 获得广播地址 
-        /// </summary> 
-        /// <param name="ipAddress">IP地址</param> 
-        /// <param name="subnetMask">子网掩码</param> 
-        /// <returns>广播地址</returns> 
-        public static string GetBroadcast(string ipAddress, string subnetMask)
-        {
-
-            byte[] ip = IPAddress.Parse(ipAddress).GetAddressBytes();
-            byte[] sub = IPAddress.Parse(subnetMask).GetAddressBytes();
-
-            // 广播地址=子网按位求反 再 或IP地址 
-            for (int i = 0; i < ip.Length; i++)
-            {
-                ip[i] = (byte)((~sub[i]) | ip[i]);
-            }
-            return new IPAddress(ip).ToString();
-        }
-
-
-        /// <summary> 
-        /// 获得网络地址 
-        /// </summary> 
-        /// <param name="ipAddress">IP地址</param> 
-        /// <param name="subnetMask">子网掩码</param> 
-        /// <returns>网络地址</returns> 
+        // 获得网络地址 
         public static string GetNetSegment(string ipAddress, string subnetMask)
         {
-
             byte[] ip = IPAddress.Parse(ipAddress).GetAddressBytes();
             byte[] sub = IPAddress.Parse(subnetMask).GetAddressBytes();
 
@@ -548,14 +352,10 @@ namespace myipset
             return new IPAddress(ip).ToString();
         }
 
-
-
-        /// <summary>
-        /// 把条框中显示的保存到ip临时表中,并返回是否成功审核
-        /// </summary>
+        // 把条框中显示的保存到ip临时表中,并返回是否成功审核
         public bool Checkinput()
         {
-             if (CheckIP(textBoxip1.Text))
+            if (CheckIP(textBoxip1.Text))
                 IpClass.setip1 = textBoxip1.Text;
             else
             {
@@ -586,7 +386,7 @@ namespace myipset
                 return false;
             }
 
-            if (textBoxdns1.Text == "")
+            if (string.IsNullOrEmpty(textBoxdns1.Text))
                 IpClass.setdns1 = "";
             else
                 if (CheckIP(textBoxdns1.Text))
@@ -598,8 +398,7 @@ namespace myipset
                 return false;
             }
 
-
-            if (textBoxdns2.Text == "")
+            if (string.IsNullOrEmpty(textBoxdns2.Text))
                 IpClass.setdns2 = "";
             else
                 if (CheckIP(textBoxdns2.Text))
@@ -613,7 +412,7 @@ namespace myipset
 
             if (IpClass.Use2Ip)
             {
-                if (textBoxip2.Text == "")
+                if (string.IsNullOrEmpty(textBoxip2.Text))
                     IpClass.setip2 = "";
                 else
                     if (CheckIP(textBoxip2.Text))
@@ -625,7 +424,7 @@ namespace myipset
                     return false;
                 }
 
-                if (textBoxmask2.Text == "")
+                if (string.IsNullOrEmpty(textBoxmask2.Text))
                     IpClass.setmask2 = "";
                 else
                     if (CheckMask(textBoxmask2.Text))
@@ -639,7 +438,7 @@ namespace myipset
             }
 
             //如果ip1和网关不为空,或者ip2和网关不为空
-            if (((IpClass.setip1 != "") && (IpClass.setgw != "")) || ((IpClass.setip2 != "") && (IpClass.setgw != "")))
+            if ((!string.IsNullOrEmpty(IpClass.setip1) && !string.IsNullOrEmpty(IpClass.setgw)) || (!string.IsNullOrEmpty(IpClass.setip2) && !string.IsNullOrEmpty(IpClass.setgw)))
             {
                 string Ip1BraodCheck = GetNetSegment(IpClass.setip1, IpClass.setmask1);
                 string Gw1BraodCheck = GetNetSegment(IpClass.setgw, IpClass.setmask1);
@@ -665,72 +464,70 @@ namespace myipset
             return true;
         }
 
-        /// <summary>
-        /// 网卡列表
-        /// </summary>
-        public void NetWorkList()
+    
+        // 生成随机MAC地址
+        public string CreateNewMacAddress()
         {
-            string manage = "SELECT * From Win32_NetworkAdapter where PhysicalAdapter=1";
-            ManagementObjectSearcher searcher = new ManagementObjectSearcher(manage);
-            ManagementObjectCollection collection = searcher.Get();
-            List<string> netWorkList = new List<string>();
-
-            foreach (ManagementObject obj in collection)
+            int min = 0;
+            int max = 15;
+            string MAC = "";
+            Random rand = new Random();
+            for (int i=0; i<12;  i++)
             {
-                netWorkList.Add(obj["NetConnectionID"].ToString());
+                MAC += rand.Next(min, max).ToString("X");
             }
-            comboBoxnet.DataSource = netWorkList;
-            comboBoxnet.SelectedItem = IpClass.NicDefaultName;    //默认选取预定义网卡,如果没有,那么就显示第一个
+            MessageBox.Show("新的随机MAC地址为: " + MAC);
+            return MAC;
         }
 
-        /// <summary>
-        /// 禁用网卡
-        /// </summary>5
-        /// <param name="netWorkName">网卡名</param>
-        /// <returns></returns>
-        public bool DisableNetWork(ManagementObject network)
+   
+        // 网卡列表,这个方法只显示真的的物理网卡列表
+        public void NetWorkList()
+        {
+            string qry = "SELECT * FROM MSFT_NetAdapter WHERE Virtual=False";
+            ManagementScope scope = new ManagementScope(@"\\.\ROOT\StandardCimv2");
+            ObjectQuery query = new ObjectQuery(qry);
+            ManagementObjectSearcher mos = new ManagementObjectSearcher(scope, query);
+            ManagementObjectCollection moc = mos.Get();
+            List<string> netWorkList = new List<string>();
+            foreach (ManagementObject mo in moc.Cast<ManagementObject>())
+            {
+                netWorkList.Add(mo["Name"]?.ToString());
+             }
+            comboBoxnet.DataSource = netWorkList;
+            comboBoxnet.SelectedItem = IpClass.NicDefaultName;    //默认选取预定义网卡,最后一个匹配优先,如果没有,那么就显示第一个
+        }
+
+        // 禁用网卡
+        public static bool DisableNetWork(ManagementObject network)
         {
             try
             {
                 network.InvokeMethod("Disable", null);
                 return true;
             }
-            catch
-            {
-                return false;
-            }
+            catch { return false; }
         }
 
-        /// <summary>
-        /// 启用网卡
-        /// </summary>
-        /// <param name="netWorkName">网卡名</param>
-        /// <returns></returns>
-        public bool EnableNetWork(ManagementObject network)
+
+        // 启用网卡
+        public static bool EnableNetWork(ManagementObject network)
         {
-            try
+             try
             {
                 network.InvokeMethod("Enable", null);
                 return true;
             }
-            catch
-            {
-                return false;
-            }
-
+            catch { return false; }
         }
 
-        /// <summary>
-        /// 网卡状态
-        /// </summary>
-        /// <param name="netWorkName">网卡名</param>
-        /// <returns></returns>
-        public bool NetWorkState(string netWorkName)
+        // 网卡状态
+        public static bool NetWorkState(string netWorkName)
         {
             string netState = "SELECT * From Win32_NetworkAdapter  where PhysicalAdapter=1";
             ManagementObjectSearcher searcher = new ManagementObjectSearcher(netState);
             ManagementObjectCollection collection = searcher.Get();
-            foreach (ManagementObject manage in collection)
+            foreach (ManagementObject manage in collection.Cast<ManagementObject>())
             {
                 if (manage["NetConnectionID"].ToString() == netWorkName)
                 {
@@ -740,19 +537,15 @@ namespace myipset
             return false;
         }
 
-        /// <summary>
-        /// 得到指定网卡
-        /// </summary>
-        /// <param name="networkname">网卡名字</param>
-        /// <returns></returns>
-        public ManagementObject NetWork(string networkname)
+        // 得到指定网卡
+        public static ManagementObject NetWork(string networkname)
         {
             string netState = "SELECT * From Win32_NetworkAdapter  where PhysicalAdapter=1";
 
             ManagementObjectSearcher searcher = new ManagementObjectSearcher(netState);
             ManagementObjectCollection collection = searcher.Get();
 
-            foreach (ManagementObject manage in collection)
+            foreach (ManagementObject manage in collection.Cast<ManagementObject>())
             {
                 if (manage["NetConnectionID"].ToString() == networkname)
                 {
@@ -762,7 +555,6 @@ namespace myipset
             return null;
         }
 
-
         private void Buttonnicenable_Click(object sender, EventArgs e)
         {
             IpClass.NicDefaultName = comboBoxnet.SelectedValue.ToString();       //记住上次选择的网卡
@@ -770,42 +562,29 @@ namespace myipset
                 if (NetWorkState(comboBoxnet.SelectedValue.ToString()))
                 {
                     if (!EnableNetWork(NetWork(comboBoxnet.SelectedValue.ToString())))
-                    {
-                        MessageBox.Show("开启网卡失败!");
-                    }
+                    { MessageBox.Show("开启网卡失败!"); }
                     else
-                    {
-                        MessageBox.Show("开启网卡成功!");
-                    }
+                    { MessageBox.Show("开启网卡成功!"); }
                 }
-                else
-                {
-                    MessageBox.Show("网卡己开启!");
-                }
+                else { MessageBox.Show("网卡己开启!"); }
 
             if (buttonnicenable.Text == "停用")
                 if (NetWorkState(comboBoxnet.SelectedValue.ToString()))
                 {
                     if (!DisableNetWork(NetWork(comboBoxnet.SelectedValue.ToString())))
-                    {
-                        MessageBox.Show("禁用网卡失败!");
-                    }
+                    { MessageBox.Show("禁用网卡失败!"); }
                     else
-                    {
-                        MessageBox.Show("禁用网卡成功!");
-                    }
+                    { MessageBox.Show("禁用网卡成功!"); }
                 }
                 else
-                {
-                    MessageBox.Show("网卡己禁用!");
-                }
+                { MessageBox.Show("网卡己禁用!"); }
             Thread.Sleep(1000);
             SelectNetCard();
             Thread.Sleep(1000);
             ChangeUI();
         }
 
-        public void ChangeUI()
+            public void ChangeUI()
         {
             if (IpClass.Use2Ip)
             {
@@ -833,7 +612,6 @@ namespace myipset
             {
                 buttonnicenable.Text = "停用";
                 buttonnicenable.ForeColor = Color.FromArgb(255, 0, 128, 0);
-
                 textBoxip1.BackColor = Color.FromArgb(255, 255, 128, 128);
                 textBoxip2.BackColor = Color.FromArgb(255, 255, 128, 128);
                 textBoxmask1.BackColor = Color.FromArgb(255, 255, 128, 128);
@@ -863,7 +641,6 @@ namespace myipset
                 textBoxgw.Text = "";
                 textBoxdns1.Text = "";
                 textBoxdns2.Text = "";
-
                 textBoxip1.BackColor = Color.FromArgb(255, 255, 128, 128);
                 textBoxip2.BackColor = Color.FromArgb(255, 255, 128, 128);
                 textBoxmask1.BackColor = Color.FromArgb(255, 255, 128, 128);
@@ -886,7 +663,6 @@ namespace myipset
             {
                 buttonnicenable.Text = "停用";
                 buttonnicenable.ForeColor = Color.FromArgb(255, 0, 128, 0);
-
                 textBoxip1.BackColor = Color.FromArgb(255, 128, 255, 128);
                 textBoxip2.BackColor = Color.FromArgb(255, 128, 255, 128);
                 textBoxmask1.BackColor = Color.FromArgb(255, 128, 255, 128);
@@ -927,36 +703,38 @@ namespace myipset
                 checkBox2IP.Enabled = true;
                 checkBoxDHCP.Enabled = true;
             }
-
         }
-        public void ShowRoute()    //暂时没用到
+
+        //显示当前路由表
+        public void ShowRoute()    
         {
             ManagementClass isrouteClass = new ManagementClass("Win32_IP4RouteTable");
             ManagementObjectCollection routeColl = isrouteClass.GetInstances();
-            foreach (ManagementObject mor in routeColl)
+            foreach (ManagementObject mor in routeColl.Cast<ManagementObject>())
             {
-                traceMessage.Items.Add("目的地址:" + mor["Destination"] + " 掩码:" + mor["Mask"] + " 下一跳:" + mor["NextHop"] + " 所在接口:" + mor["InterfaceIndex"] + " 跃点数:" + mor["Metric1"]);
-                if ((mor["Destination"].ToString() == "0.0.0.0")) // && (mor["InterfaceIndex"].ToString() == mo["InterfaceIndex"].ToString()))
+                if (mor["Destination"].ToString().Length < 9)
                 {
-                    try
-                    {
-                        traceMessage.Items.Add("正在删除网关为" + mor["NextHop"] + "的默认路由,所在接口: " + mor["InterfaceIndex"]);
-                        mor.Delete(); //删除这条路由。
-                    }
-                    catch (UnauthorizedAccessException)
-                    {
-                        MessageBox.Show("添加修改路由表无权限，请以管理员权限执行程序");
-                    }
+                    if (mor["Mask"].ToString().Length < 9)
+                        traceMessage.Items.Add(mor["Destination"] + "\t\t" + mor["Mask"] + "\t\t下一跳:\t" + mor["NextHop"] + "\t接口:" + mor["InterfaceIndex"] + "\t代价:" + mor["Metric1"]);
+                    else
+                        traceMessage.Items.Add(mor["Destination"] + "\t\t" + mor["Mask"] + "\t下一跳:\t" + mor["NextHop"] + "\t接口:" + mor["InterfaceIndex"] + "\t代价:" + mor["Metric1"]);
+                }
+                else
+                {
+                    if (mor["Mask"].ToString().Length < 9)
+                        traceMessage.Items.Add(mor["Destination"] + "\t" + mor["Mask"] + "\t\t下一跳:\t" + mor["NextHop"] + "\t接口:" + mor["InterfaceIndex"] + "\t代价:" + mor["Metric1"]);
+                    else
+                        traceMessage.Items.Add(mor["Destination"] + "\t" + mor["Mask"] + "\t下一跳:\t" + mor["NextHop"] + "\t接口:" + mor["InterfaceIndex"] + "\t代价:" + mor["Metric1"]);
                 }
             }
+            traceMessage.Items.Add("-----------------------------------------------------------------");
+            traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
         }
 
-        /// <summary>
         /// Process类执行DOS命令netsh
-        /// </summary>
         private string RunCommand(string command)
         {
-            string returnStr = null;
+            string returnStr;
             //实例一个新的process类,启动一个新的进程
             Process p = new Process();
             //Process类有一个StartInfo属性
@@ -974,8 +752,10 @@ namespace myipset
             return returnStr;        //从输出流取得命令执行结果
         }
 
-        public void ReadConfig()    
+        //读取配置文件 config.cfg 然后生成一个配置方案的下拉集合
+        public void ReadConfig()
         {
+            FangAn.Items.Clear();
             FangAn.Items.Add("自动获取地址");
             FangAn.Items.Add("当前使用地址");
             FangAn.Items.Add("上次使用地址");
@@ -994,26 +774,41 @@ namespace myipset
             IpClass.configfile = (IpClass.configfile.Replace("\r", ""));
 
             //每个方案用|隔开，每个方案的具体地IP用#隔开，用分隔符读取多个方案
-            IpClass.fanganArray = IpClass.configfile.Split(new char[] { '|' });
-            //MessageBox.Show(IpClass.fanganArray.Length.ToString());
-            foreach (string i in IpClass.fanganArray)
+            string[] configArray = IpClass.configfile.Split(new char[] { '|' });
+            foreach (string config in configArray)
             {
-               // MessageBox.Show(i);
-                traceMessage.Items.Add(i);
-                IpClass.itemArray = i.Split(new char[] { '#' });
-                foreach (string j in IpClass.itemArray)
+                if (config.Length > 0)
                 {
-                   // MessageBox.Show(j);
-                    traceMessage.Items.Add(j);
-                    if (j.Contains("方案名字:") && (!j.Contains("当前使用地址")) && (!j.Contains("上次使用地址")) && (!j.Contains("自动获取地址")))
-                    {
-                        FangAn.Items.Add(j.Replace("方案名字:", ""));
-                       // MessageBox.Show("包含"+j);
-                    }
+                    NetConfig nc = new NetConfig(config);
+                    IpClass.netConfigDict.Add(nc.Name, nc);
+                    //traceMessage.Items.Add(config);
+                    traceMessage.Items.Add("========== 方案:" + nc.Name + " ==========");
+                    traceMessage.Items.Add("IP地址\t\t" + (nc.IP1 == "" ? "无" : nc.IP1));      //测试等于空先
+                    traceMessage.Items.Add("IP掩码\t\t" + (nc.Mask1 != "" ? nc.Mask1 : "无"));   //测试不等于空先
+                    traceMessage.Items.Add("IP网关\t\t" + (nc.Gateway != "" ? nc.Gateway : "无"));
+                    traceMessage.Items.Add("首选DNS\t\t" + (nc.DNS1 != "" ? nc.DNS1 : "无"));
+                    traceMessage.Items.Add("备选DNS\t\t" + (nc.DNS2 != "" ? nc.DNS2 : "无"));
+                    traceMessage.Items.Add("IP地址2\t\t" + (nc.IP2 != "" ? nc.IP2 : "无"));
+                    traceMessage.Items.Add("IP掩码2\t\t" + (nc.Mask2 != "" ? nc.Mask2 : "无"));
+                    FangAn.Items.Add(nc.Name);
                 }
-                traceMessage.Items.Add("--------------------------------------------------------\r\n");
             }
             traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
+        }
+
+        public void SaveConfig()
+        {
+            FileStream fs = new FileStream("config.cfg", FileMode.Truncate, FileAccess.Write);
+            StreamWriter sw = new StreamWriter(fs);
+
+            foreach (NetConfig config in IpClass.netConfigDict.Values)
+            {
+                string saveString = config.ToString();
+                traceMessage.Items.Add("写入\t\t" + saveString);
+                sw.WriteLine(saveString);
+            }
+            sw.Close();
+            traceMessage.Items.Add("已保存配置方案");
         }
 
         public void SelectFangAn()
@@ -1021,14 +816,14 @@ namespace myipset
             if (FangAn.Text == "自动获取地址")
             {
                 IpClass.UseDhcp = true;
-                traceMessage.Items.Add("已改为网卡自动获取地址" + "\r\n");
+                traceMessage.Items.Add("已选择网卡自动获取地址" + "\r\n");
                 traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
                 return;
             }
             if (FangAn.Text == "当前使用地址")
             {
                 SelectNetCard();
-                traceMessage.Items.Add("已改为网卡当前使用地址" + "\r\n");
+                traceMessage.Items.Add("已选择网卡当前使用地址" + "\r\n");
                 traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
                 return;
             }
@@ -1043,28 +838,37 @@ namespace myipset
                 textBoxdns2.Text = IpClass.lastArray[5];
                 textBoxip2.Text = IpClass.lastArray[6];
                 textBoxmask2.Text = IpClass.lastArray[7];
-                traceMessage.Items.Add("已改为网卡上次使用地址" + "\r\n");
+                traceMessage.Items.Add("已选择网卡上次使用地址" + "\r\n");
                 traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
                 return;
             }
 
-            foreach (string i in IpClass.fanganArray)
+            if (!string.IsNullOrEmpty(FangAn.Text))
             {
-                IpClass.itemArray = i.Split(new char[] { '#' });
-                if (IpClass.itemArray[0].Contains(FangAn.Text))
-                {
-                    IpClass.UseDhcp = false;
-                    traceMessage.Items.Add("已选择"+IpClass.itemArray[0]+"\r\n");
-                    traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
-                    textBoxip1.Text = IpClass.itemArray[1];
-                    textBoxmask1.Text = IpClass.itemArray[2];
-                    textBoxgw.Text = IpClass.itemArray[3];
-                    textBoxdns1.Text = IpClass.itemArray[4];
-                    textBoxdns2.Text = IpClass.itemArray[5];
-                    textBoxip2.Text = IpClass.itemArray[6];
-                    textBoxmask2.Text = IpClass.itemArray[7];
-                    if ((textBoxip2.Text != "") && (textBoxmask2.Text != "")) IpClass.Use2Ip = true; else IpClass.Use2Ip = false;
-                }
+                NetConfig config = IpClass.netConfigDict[FangAn.Text];
+                IpClass.UseDhcp = false;
+                traceMessage.Items.Add("已选择" + config.Name + "\r\n");
+                traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
+                textBoxip1.Text = config.IP1;
+                textBoxmask1.Text = config.Mask1;
+                textBoxgw.Text = config.Gateway;
+                textBoxdns1.Text = config.DNS1;
+                textBoxdns2.Text = config.DNS2;
+                textBoxip2.Text = config.IP2;
+                textBoxmask2.Text = config.Mask2;
+                if (!string.IsNullOrEmpty(textBoxip2.Text) && !string.IsNullOrEmpty(textBoxmask2.Text)) IpClass.Use2Ip = true; else IpClass.Use2Ip = false;
+            }
+        }
+
+        public void UpdateFanganList()
+        {
+            FangAn.Items.Clear();
+            FangAn.Items.Add("自动获取地址");
+            FangAn.Items.Add("当前使用地址");
+            FangAn.Items.Add("上次使用地址");
+            foreach (NetConfig config in IpClass.netConfigDict.Values)
+            {
+                FangAn.Items.Add(config.Name);
             }
         }
 
@@ -1136,54 +940,66 @@ namespace myipset
             traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
         }
 
-
         private void FangAn_SelectedIndexChanged(object sender, EventArgs e)
         {
-            SelectFangAn();
-            ChangeUI();
+            string name = FangAn.Text;
+            if (string.IsNullOrEmpty(name) || name == "自动获取地址" || name == "当前使用地址")
+            {
+                return;
+            }
+            if (name == "上次使用地址")
+            {
+                traceMessage.Items.Add("========== 请参上次使用的地址: ==========");
+                if (!string.IsNullOrEmpty(IpClass.lastArray[1])) traceMessage.Items.Add("IP1 地址\t\t" + IpClass.lastArray[1]);
+                if (!string.IsNullOrEmpty(IpClass.lastArray[2])) traceMessage.Items.Add("IP1 掩码\t\t" + IpClass.lastArray[2]);
+                if (!string.IsNullOrEmpty(IpClass.lastArray[3])) traceMessage.Items.Add("网关地址 \t\t" + IpClass.lastArray[3]);
+                if (!string.IsNullOrEmpty(IpClass.lastArray[4])) traceMessage.Items.Add("DNS1地址\t\t" + IpClass.lastArray[4]);
+                if (!string.IsNullOrEmpty(IpClass.lastArray[5])) traceMessage.Items.Add("DNS2地址\t\t" + IpClass.lastArray[5]);
+                if (!string.IsNullOrEmpty(IpClass.lastArray[6])) traceMessage.Items.Add("IP2 地址\t\t" + IpClass.lastArray[6]);
+                if (!string.IsNullOrEmpty(IpClass.lastArray[7])) traceMessage.Items.Add("IP2 掩码\t\t" + IpClass.lastArray[7]);
+                traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
+                return;
+            }
+            NetConfig config = IpClass.netConfigDict[name];
+            traceMessage.Items.Add("========== 请参考方案:" + FangAn.Text + "的配置 ==========");
+            if (!string.IsNullOrEmpty(config.IP1)) traceMessage.Items.Add("IP1 地址\t\t" + config.IP1);
+            if (!string.IsNullOrEmpty(config.Mask1)) traceMessage.Items.Add("IP1 掩码\t\t" + config.Mask1);
+            if (!string.IsNullOrEmpty(config.Gateway)) traceMessage.Items.Add("网关地址 \t\t" + config.Gateway);
+            if (!string.IsNullOrEmpty(config.DNS1)) traceMessage.Items.Add("DNS1地址\t\t" + config.DNS1);
+            if (!string.IsNullOrEmpty(config.DNS2)) traceMessage.Items.Add("DNS2地址\t\t" + config.DNS2);
+            if (!string.IsNullOrEmpty(config.IP2)) traceMessage.Items.Add("IP2 地址\t\t" + config.IP2);
+            if (!string.IsNullOrEmpty(config.Mask2)) traceMessage.Items.Add("IP2 掩码\t\t" + config.Mask2);
+            traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
         }
-
-
 
         private void FangAn_DoubleClick(object sender, EventArgs e)
         {
             SelectFangAn();
-            SetNetworkAdapter2();
+            SetNetworkAdapter();
+            ChangeUI();
         }
-
-
-        /// <summary>
-        /// 鼠标左键和右键
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        /*
-                private void FangAn_MouseDown(object sender, MouseEventArgs e)
-                {
-                    if (e.Button == MouseButtons.Left)
-                    {
-                        MessageBox.Show("left");
-                    }
-                    else
-                    {
-                        MessageBox.Show("right");
-                    }
-                }
-        */
-
 
         private void 应用ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SelectFangAn();
-            SetNetworkAdapter2();
+            SetNetworkAdapter();
         }
-
-
 
         private void 编辑ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Form2 f2 = new Form2();
-            f2.Owner = this;
+            string name = this.FangAn.Text;
+            if (string.IsNullOrEmpty(name) || !IpClass.netConfigDict.ContainsKey(name))
+            {
+                return;
+            }
+            NetConfig config = IpClass.netConfigDict[name];
+            Form2 f2 = new Form2(config)
+            { Owner = this };
+            
+            //增加可编辑的下拉列表
+            foreach (NetConfig cfg in IpClass.netConfigDict.Values)
+            { f2.fangAnName.Items.Add(cfg.Name); }
+
             f2.fangAnName.Text = this.FangAn.Text;
             f2.textBoxip1.Text = this.textBoxip1.Text;
             f2.textBoxmask1.Text = this.textBoxmask1.Text;
@@ -1192,26 +1008,54 @@ namespace myipset
             f2.textBoxdns2.Text = this.textBoxdns2.Text;
             f2.textBoxip2.Text = this.textBoxip2.Text;
             f2.textBoxmask2.Text = this.textBoxmask2.Text;
-            f2.Show() ; 
+            f2.Show();
         }
 
         private void 参考ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("这是参考");
+            string name = FangAn.Text;
+            if (!string.IsNullOrEmpty(name))
+            {
+                NetConfig config = IpClass.netConfigDict[name];
+                textBoxip1.Text = config.IP1;
+                textBoxmask1.Text = config.Mask1;
+                textBoxgw.Text = config.Gateway;
+                textBoxdns1.Text = config.DNS1;
+                textBoxdns2.Text = config.DNS2;
+                textBoxip2.Text = config.IP2;
+                textBoxmask2.Text = config.Mask2;
+            }
         }
 
         private void 新建ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("这是新建");
+            string dat = DateTime.Now.ToString();
+            NetConfig config = new NetConfig("方案名字:方案"+ dat + "#######");
+            IpClass.netConfigDict.Add("方案"+ dat, config);
+            FangAn.Items.Add("方案" + dat);
+            FangAn.SetSelected(FangAn.Items.Count - 1, true);
 
-
-
-
-        }
+            Form2 f2 = new Form2(config) { Owner = this };
+            f2.fangAnName.Text = this.FangAn.Text;
+            f2.textBoxip1.Text = this.textBoxip1.Text;
+            f2.textBoxmask1.Text = this.textBoxmask1.Text;
+            f2.textBoxgw.Text = this.textBoxgw.Text;
+            f2.textBoxdns1.Text = this.textBoxdns1.Text;
+            f2.textBoxdns2.Text = this.textBoxdns2.Text;
+            f2.textBoxip2.Text = this.textBoxip2.Text;
+            f2.textBoxmask2.Text = this.textBoxmask2.Text;
+            f2.Show();
+         }
 
         private void 删除ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("这是删除");
+            string name = FangAn.Text;
+            if (!string.IsNullOrEmpty(name) && name != "自动获取地址" && name != "当前使用地址" && name != "上次使用地址")
+            {
+                FangAn.Items.Remove(name);
+                IpClass.netConfigDict.Remove(name);
+                SaveConfig();
+            }
         }
 
         private void Buttonreflash_Click(object sender, EventArgs e)
@@ -1219,42 +1063,63 @@ namespace myipset
             SelectNetCard();
             ChangeUI();
         }
-
-        private void label1_Click(object sender, EventArgs e)
+ 
+        // 保存配置方案
+        private void Buttonsaveconfig_Click(object sender, EventArgs e)
         {
+            string name = FangAn.Text;
+            if (!string.IsNullOrEmpty(name))
+            {
+                NetConfig config = IpClass.netConfigDict[name];
+                config.IP1 = this.textBoxip1.Text;
+                config.Mask1 = this.textBoxmask1.Text;
+                config.Gateway = this.textBoxgw.Text;
+                config.DNS1 = this.textBoxdns1.Text;
+                config.DNS2 = this.textBoxdns2.Text;
+                config.IP2 = this.textBoxip2.Text;
+                config.Mask2 = this.textBoxmask2.Text;
+            }
+            SaveConfig();
+        }
 
+        private void Button_showroute_Click(object sender, EventArgs e)
+        {
+            ShowRoute();
+        }
+
+        private void ButtonMAC_change_Click(object sender, EventArgs e)
+        {
+           // SetMACAddress(IpClass.NicDescript, CreateNewMacAddress());  
         }
     }
-}
 
-public static class IpClass
-{
-    public static bool UseDhcp = false;
-    public static bool Use2Ip = false;
-    public static bool IpCheckOk = true;
-    public static bool NiceEnable = true;
-    public static bool NicConnect = true;
-    public static bool lastUseDhcp = true;
-    public static bool lastUse2Ip = true;
+    public static class IpClass
+    {
+        public static bool UseDhcp = false;
+        public static bool Use2Ip = false;
+        public static bool IpCheckOk = true;
+        public static bool NiceEnable = true;
+        public static bool NicConnect = true;
+        public static bool lastUseDhcp = true;
+        public static bool lastUse2Ip = true;
 
-    public static string NicName = "";
-    public static string NicDefaultName = "本地连接";
-    public static string NicDescript = "";
-    public static string NicMAC = "";
-    public static string setip1 = "";
-    public static string setmask1 = "";
-    public static string setgw = "";
-    public static string setdns1 = "";
-    public static string setdns2 = "";
-    public static string setip2 = "";
-    public static string setmask2 = "";
-    public static string lastgw = "";
-    public static string[] fanganArray = null;
-    public static string[] itemArray = null;
-    public static string[] lastArray = { "", "", "", "", "", "", "", "" };
-    public static string configfile= "";
-
-
+        public static string NicName = "";
+        public static string NicDefaultName = "以太网";
+        public static string NicDescript = "";
+        public static string NicMAC = "";
+        public static string setip1 = "";
+        public static string setmask1 = "";
+        public static string setgw = "";
+        public static string setdns1 = "";
+        public static string setdns2 = "";
+        public static string setip2 = "";
+        public static string setmask2 = "";
+        public static string lastgw = "";
+        public static Dictionary<string, NetConfig> netConfigDict = null;
+        public static string[] itemArray = null;
+        public static string[] lastArray = { "", "", "", "", "", "", "", "" };
+        public static string configfile = "";
+    }
 }
 
 

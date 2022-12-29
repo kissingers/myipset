@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="myipset 的规则" Description="myipset.csproj 的 Code Analysis 规则。" ToolsVersion="17.0">
+  <IncludeAll Action="Warning" />
+  <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp" RuleNamespace="Microsoft.CodeAnalysis.CSharp">
+    <Rule Id="CS9018" Action="Warning" />
+    <Rule Id="CS9019" Action="Warning" />
+    <Rule Id="CS9020" Action="Warning" />
+    <Rule Id="CS9021" Action="Warning" />
+    <Rule Id="CS9022" Action="Warning" />
+  </Rules>
+</RuleSet>
