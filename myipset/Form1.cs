@@ -10,9 +10,7 @@ using System.Diagnostics;
 using System.IO;
 using Microsoft.Win32;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
-using System.Net.Sockets;
 
 namespace myipset
 {
