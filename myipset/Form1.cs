@@ -26,8 +26,8 @@ namespace myipset
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            NetWorkList();
             ShowAdapterInfo();
+            NetWorkList();
             Savelastip();
             ReadConfig();
         }
@@ -61,6 +61,28 @@ namespace myipset
             ChangeUI();
         }
 
+        // 网卡列表,这个方法只显示真的的物理网卡列表
+        public void NetWorkList()
+        {
+            string qry = "SELECT * FROM MSFT_NetAdapter WHERE Virtual=False";
+            ManagementScope scope = new ManagementScope(@"\\.\ROOT\StandardCimv2");
+            ObjectQuery query = new ObjectQuery(qry);
+            ManagementObjectSearcher mos = new ManagementObjectSearcher(scope, query);
+            ManagementObjectCollection moc = mos.Get();
+            List<string> netWorkList = new List<string>();
+            foreach (ManagementObject mo in moc.Cast<ManagementObject>())
+            {
+                netWorkList.Add(mo["Name"]?.ToString());
+                uint ConnectState = Convert.ToUInt32(mo["MediaConnectState"] ?? 0);
+                if (ConnectState == 1)    //网卡连接状态0未知  1已连接 2断开
+                {
+                    IpClass.NicDefaultName = mo["Name"]?.ToString();
+                }
+            }
+            comboBoxnet.DataSource = netWorkList;
+            comboBoxnet.SelectedItem = IpClass.NicDefaultName;    //默认选取预定义网卡,最后点亮的物理网卡匹配优先,如果都没有,就默认第一个.
+        }
+
         //显示网卡信息  
         public void ShowAdapterInfo()
         {
@@ -70,14 +92,8 @@ namespace myipset
             int index = 0;
             foreach (NetworkInterface adapter in adapters)
             {
+                //显示网络适配器描述信息、名称、类型、速度、MAC 地址  
                 index++;
-
-                //如果网卡起来,且网卡类型为以太网,那么作为默认下拉修改的网卡
-                if ((adapter.OperationalStatus.ToString() == "Up") && (adapter.NetworkInterfaceType.ToString() == "Ethernet"))
-                {
-                    IpClass.NicDefaultName = adapter.Name;  
-                }
-                 //显示网络适配器描述信息、名称、类型、速度、MAC 地址  
                 traceMessage.Items.Add("------------------------第" + index + "个适配器信息------------------------");
                 traceMessage.Items.Add("网卡名字：" + adapter.Name);
                 traceMessage.Items.Add("网卡描述：" + adapter.Description);
@@ -516,25 +532,6 @@ namespace myipset
                 return  true;
             else 
                 return false;
-        }
-
-
-
-    // 网卡列表,这个方法只显示真的的物理网卡列表
-    public void NetWorkList()
-        {
-            string qry = "SELECT * FROM MSFT_NetAdapter WHERE Virtual=False";
-            ManagementScope scope = new ManagementScope(@"\\.\ROOT\StandardCimv2");
-            ObjectQuery query = new ObjectQuery(qry);
-            ManagementObjectSearcher mos = new ManagementObjectSearcher(scope, query);
-            ManagementObjectCollection moc = mos.Get();
-            List<string> netWorkList = new List<string>();
-            foreach (ManagementObject mo in moc.Cast<ManagementObject>())
-            {
-                netWorkList.Add(mo["Name"]?.ToString());
-             }
-            comboBoxnet.DataSource = netWorkList;
-            comboBoxnet.SelectedItem = IpClass.NicDefaultName;    //默认选取预定义网卡,最后一个匹配优先,如果没有,那么就显示第一个
         }
 
         // 禁用网卡
