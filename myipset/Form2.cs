@@ -28,7 +28,7 @@ namespace myipset
             IpClass.netConfigDict.Add(config.Name, config);
             ((Form1)this.Owner).UpdateFanganList();
             ((Form1)this.Owner).SaveConfig();
-            this.Close();            
+            this.Close();
         }
 
         private void Buttoncancel_Click(object sender, EventArgs e)

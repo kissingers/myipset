@@ -1,20 +1,19 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
+using System.Linq;
 using System.Management;
-using System.Threading;
 using System.Net;
 using System.Net.NetworkInformation;
-using System.Windows.Forms;
-using System.Diagnostics;
-using System.IO;
-using Microsoft.Win32;
-using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace myipset
 {
-
     public partial class Form1 : Form
     {
         public Form1()
@@ -83,7 +82,7 @@ namespace myipset
             comboBoxnet.SelectedItem = IpClass.NicDefaultName;    //默认选取预定义网卡,最后点亮的物理网卡匹配优先,如果都没有,就默认第一个.
         }
 
-        //显示网卡信息  
+        //显示网卡信息
         public void ShowAdapterInfo()
         {
             NetworkInterface[] adapters = NetworkInterface.GetAllNetworkInterfaces();
@@ -92,7 +91,7 @@ namespace myipset
             int index = 0;
             foreach (NetworkInterface adapter in adapters)
             {
-                //显示网络适配器描述信息、名称、类型、速度、MAC 地址  
+                //显示网络适配器描述信息、名称、类型、速度、MAC 地址
                 index++;
                 traceMessage.Items.Add("------------------------第" + index + "个适配器信息------------------------");
                 traceMessage.Items.Add("网卡名字：" + adapter.Name);
@@ -104,7 +103,7 @@ namespace myipset
                 traceMessage.Items.Add("网卡速度：" + adapter.Speed / 1000 / 1000 + "MB");
 
                 IPInterfaceProperties ip = adapter.GetIPProperties();
- 
+
                 if (adapter.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
                 {
                     traceMessage.Items.Add("网卡类型：有线网卡");
@@ -139,14 +138,13 @@ namespace myipset
             traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
         }
 
-        // 选择网卡下拉列表时候显示对应的网卡 
+        // 选择网卡下拉列表时候显示对应的网卡
         public void SelectNetCard()
         {
             IpClass.NiceEnable = false;
             IpClass.UseDhcp = false;
             IpClass.NicConnect = false;
             IpClass.Use2Ip = false;
-
 
             NetworkInterface[] adapters = NetworkInterface.GetAllNetworkInterfaces();
             foreach (NetworkInterface adapter in adapters)
@@ -172,7 +170,6 @@ namespace myipset
                 {
                     IpClass.NicConnect = true;
                 }
-
 
                 //处理IP和掩码,最多2组IPv4
                 int index1 = 0;
@@ -289,7 +286,7 @@ namespace myipset
             {
                 RunCommand("interface ipv4 delete dns name=\"" + IpClass.NicName + "\" all");
             }
-            if (!string.IsNullOrEmpty(IpClass.setdns2 ))
+            if (!string.IsNullOrEmpty(IpClass.setdns2))
             {
                 traceMessage.Items.Add("interface ipv4 add dns name=\"" + IpClass.NicName + "\" addr=" + IpClass.setdns2);
                 RunCommand("interface ipv4 add dns name=\"" + IpClass.NicName + "\" addr=" + IpClass.setdns2);
@@ -346,7 +343,7 @@ namespace myipset
                         }
                         else
                         {
-                            if (vZero) return false; // 出现0后有非0位则无效 
+                            if (vZero) return false; // 出现0后有非0位则无效
                         }
                     }
                 }
@@ -355,13 +352,13 @@ namespace myipset
             return true;
         }
 
-        // 获得网络地址 
+        // 获得网络地址
         public static string GetNetSegment(string ipAddress, string subnetMask)
         {
             byte[] ip = IPAddress.Parse(ipAddress).GetAddressBytes();
             byte[] sub = IPAddress.Parse(subnetMask).GetAddressBytes();
 
-            // 网络地址=子网按位与IP地址 
+            // 网络地址=子网按位与IP地址
             for (int i = 0; i < ip.Length; i++)
             {
                 ip[i] = (byte)((sub[i]) & ip[i]);
@@ -498,7 +495,7 @@ namespace myipset
                         //MessageBox.Show("新的MAC地址为: "+ newMac);
                         if (string.IsNullOrEmpty(newMac))
                         { macRegistry.DeleteValue("NetworkAddress"); }
-                        else 
+                        else
                         { macRegistry.SetValue("NetworkAddress", newMac); }
                         macRegistry.Close();
                         break;
@@ -516,7 +513,7 @@ namespace myipset
             int max = 15;
             string MAC = "AA";
             Random rand = new Random();
-            for (int i=0; i<10;  i++)
+            for (int i = 0; i < 10; i++)
             {
                 MAC += rand.Next(min, max).ToString("X");
             }
@@ -529,8 +526,8 @@ namespace myipset
         {
             string pattrn = @"(^[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]$)";
             if (System.Text.RegularExpressions.Regex.IsMatch(MAC, pattrn))
-                return  true;
-            else 
+                return true;
+            else
                 return false;
         }
 
@@ -545,11 +542,10 @@ namespace myipset
             catch { return false; }
         }
 
-
         // 启用网卡
         public static bool EnableNetWork(ManagementObject network)
         {
-             try
+            try
             {
                 network.InvokeMethod("Enable", null);
                 return true;
@@ -620,7 +616,7 @@ namespace myipset
             ChangeUI();
         }
 
-            public void ChangeUI()
+        public void ChangeUI()
         {
             if (IpClass.Use2Ip)
             {
@@ -742,7 +738,7 @@ namespace myipset
         }
 
         //显示当前路由表
-        public void ShowRoute()    
+        public void ShowRoute()
         {
             ManagementClass isrouteClass = new ManagementClass("Win32_IP4RouteTable");
             ManagementObjectCollection routeColl = isrouteClass.GetInstances();
@@ -1031,7 +1027,7 @@ namespace myipset
             NetConfig config = IpClass.netConfigDict[name];
             Form2 f2 = new Form2(config)
             { Owner = this };
-            
+
             //增加可编辑的下拉列表
             foreach (NetConfig cfg in IpClass.netConfigDict.Values)
             { f2.fangAnName.Items.Add(cfg.Name); }
@@ -1066,8 +1062,8 @@ namespace myipset
         private void 新建ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             string dat = DateTime.Now.ToString();
-            NetConfig config = new NetConfig("方案名字:方案"+ dat + "#######");
-            IpClass.netConfigDict.Add("方案"+ dat, config);
+            NetConfig config = new NetConfig("方案名字:方案" + dat + "#######");
+            IpClass.netConfigDict.Add("方案" + dat, config);
             FangAn.Items.Add("方案" + dat);
             FangAn.SetSelected(FangAn.Items.Count - 1, true);
 
@@ -1083,7 +1079,7 @@ namespace myipset
             f2.textBoxip2.Text = this.textBoxip2.Text;
             f2.textBoxmask2.Text = this.textBoxmask2.Text;
             f2.Show();
-         }
+        }
 
         private void 删除ToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -1102,7 +1098,6 @@ namespace myipset
             ChangeUI();
         }
 
- 
         // 保存配置方案
         private void Buttonsaveconfig_Click(object sender, EventArgs e)
         {
@@ -1199,5 +1194,3 @@ namespace myipset
         public static string configfile = "";
     }
 }
-
-
