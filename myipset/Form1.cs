@@ -1165,32 +1165,4 @@ namespace myipset
             }
         }
     }
-
-    public static class IpClass
-    {
-        public static bool UseDhcp = false;
-        public static bool Use2Ip = false;
-        public static bool IpCheckOk = true;
-        public static bool NiceEnable = true;
-        public static bool NicConnect = true;
-        public static bool lastUseDhcp = true;
-        public static bool lastUse2Ip = true;
-
-        public static string NicName = "";
-        public static string NicDefaultName = "以太网";
-        public static string NicDescript = "";
-        public static string NicMAC = "";
-        public static string setip1 = "";
-        public static string setmask1 = "";
-        public static string setgw = "";
-        public static string setdns1 = "";
-        public static string setdns2 = "";
-        public static string setip2 = "";
-        public static string setmask2 = "";
-        public static string lastgw = "";
-        public static Dictionary<string, NetConfig> netConfigDict = null;
-        public static string[] itemArray = null;
-        public static string[] lastArray = { "", "", "", "", "", "", "", "" };
-        public static string configfile = "";
-    }
 }

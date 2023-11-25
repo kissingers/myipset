@@ -1,8 +1,37 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace myipset
 {
+    public static class IpClass
+    {
+        public static bool UseDhcp = false;
+        public static bool Use2Ip = false;
+        public static bool IpCheckOk = true;
+        public static bool NiceEnable = true;
+        public static bool NicConnect = true;
+        public static bool lastUseDhcp = true;
+        public static bool lastUse2Ip = true;
+
+        public static string NicName = "";
+        public static string NicDefaultName = "以太网";
+        public static string NicDescript = "";
+        public static string NicMAC = "";
+        public static string setip1 = "";
+        public static string setmask1 = "";
+        public static string setgw = "";
+        public static string setdns1 = "";
+        public static string setdns2 = "";
+        public static string setip2 = "";
+        public static string setmask2 = "";
+        public static string lastgw = "";
+        public static Dictionary<string, NetConfig> netConfigDict = null;
+        public static string[] itemArray = null;
+        public static string[] lastArray = { "", "", "", "", "", "", "", "" };
+        public static string configfile = "";
+    }
+
     public class NetConfig
     {
         private string name = "";           // 方案名字
@@ -32,18 +61,6 @@ namespace myipset
             }
 
             Console.WriteLine(data.Length);
-        }
-
-        public NetConfig(string name, string ip_1, string mask_1, string gateway, string dns_1, string dns_2, string ip_2, string mask_2)
-        {
-            this.name = name;
-            this.ip_1 = ip_1;
-            this.mask_1 = mask_1;
-            this.gateway = gateway;
-            this.dns_1 = dns_1;
-            this.dns_2 = dns_2;
-            this.ip_2 = ip_2;
-            this.mask_2 = mask_2;
         }
 
         public string Name
