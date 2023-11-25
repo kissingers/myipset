@@ -203,7 +203,6 @@ namespace myipset
                 foreach (GatewayIPAddressInformation gateway in gatewayIpAdds)
                 {
                     textBoxgw.Text = gateway.Address.ToString();
-                    IpClass.lastgw = gateway.Address.ToString();
                 }
 
                 //处理DNS服务器地址,最多2组
@@ -224,14 +223,29 @@ namespace myipset
         // 设置网卡ip地址
         public bool SetNetworkAdapter()
         {
-            //先判断ip是否合法
+            //如果是地址是自动获取的,上面已经修改为dhcp模式了,完成任务直接结束
             if (IpClass.UseDhcp)
-                IpClass.IpCheckOk = true;
-            else
-                IpClass.IpCheckOk = Checkinput();
+            {
+                traceMessage.Items.Add("运行命令 netsh interface ip set address name =" + IpClass.NicName + " source = dhcp");
+                traceMessage.Items.Add("运行命令 netsh interface ip set dns name =" + IpClass.NicName + " source = dhcp");
+                RunCommand("interface ip set address name =" + IpClass.NicName + " source = dhcp");
+                RunCommand("interface ip set dns name =" + IpClass.NicName + " source = dhcp");
+                traceMessage.Items.Add("-----------------修改网卡动态获取地址结束-------------------\r\n");
+                SelectNetCard();
+                ChangeUI();
+                traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
+                return true;
+            }
 
-            //不合法不重置输入界面直接退出
-            if (!IpClass.IpCheckOk)
+            //网卡不是dhcp则检查是否激活,不激活直接退出
+            if (!IpClass.NicConnect)
+            {
+                MessageBox.Show("当前网卡未激活，请激活网卡后再设置IP！");
+                return false;
+            }
+
+            //不是动态则检查IP是否合法，不合法直接退出
+            if (!Checkinput())
             {
                 traceMessage.Items.Add("----------------需要修改的IP不符合规范,更改IP不成功----------------\r\n");
                 traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
@@ -241,57 +255,67 @@ namespace myipset
             //检查合格保存当前网卡状态，以备可以回退一次
             Savelastip();
 
-            //如果是地址是自动获取的,上面已经修改为dhcp模式了,完成任务直接结束
-            if (IpClass.UseDhcp)
+            //处理第一组IP掩码和网关
+            if (IpClass.lastUseDhcp || IpClass.setip1 != IpClass.lastArray[1] || IpClass.setmask1 != IpClass.lastArray[2] || IpClass.setgw != IpClass.lastArray[3])
             {
-                traceMessage.Items.Add("运行命令 netsh interface ip set address name =" + IpClass.NicName + " source = dhcp");
-                traceMessage.Items.Add("运行命令 netsh interface ip set dns name =" + IpClass.NicName + " source = dhcp");
-                RunCommand("interface ip set address name =" + IpClass.NicName + " source = dhcp");
-                RunCommand("interface ip set dns name =" + IpClass.NicName + " source = dhcp");
-                traceMessage.Items.Add("---------------------修改网卡结束-----------------------\r\n");
-                SelectNetCard();
-                ChangeUI();
-                traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
-                return true;
+                //如果ip、掩码和网关都不为空,则设置ip地址和子网掩码和网关
+                if (!string.IsNullOrEmpty(IpClass.setip1) && !string.IsNullOrEmpty(IpClass.setmask1) && !string.IsNullOrEmpty(IpClass.setgw))
+                {
+                    traceMessage.Items.Add("interface ipv4 set address \"" + IpClass.NicName + "\" static " + IpClass.setip1 + " " + IpClass.setmask1 + " " + IpClass.setgw);
+                    RunCommand("interface ipv4 set address \"" + IpClass.NicName + "\" static " + IpClass.setip1 + " " + IpClass.setmask1 + " " + IpClass.setgw);
+                }
+
+                //如果ip和掩码都不为空，但是没网关，则设置ip地址和子网掩码
+                if (!string.IsNullOrEmpty(IpClass.setip1) && !string.IsNullOrEmpty(IpClass.setmask1) && string.IsNullOrEmpty(IpClass.setgw))
+                {
+                    traceMessage.Items.Add("interface ipv4 set address \"" + IpClass.NicName + "\" static " + IpClass.setip1 + " " + IpClass.setmask1);
+                    RunCommand("interface ipv4 set address \"" + IpClass.NicName + "\" static " + IpClass.setip1 + " " + IpClass.setmask1);
+                }
             }
 
-            //如果ip、掩码和网关都不为空,则设置ip地址和子网掩码和网关
-            if (!string.IsNullOrEmpty(IpClass.setip1) && !string.IsNullOrEmpty(IpClass.setmask1) && !string.IsNullOrEmpty(IpClass.setgw))
+            //处理第二组IP掩码
+            if (IpClass.Use2Ip)
             {
-                traceMessage.Items.Add("interface ipv4 set address name=\"" + IpClass.NicName + "\" source =static addr=" + IpClass.setip1 + " mask=" + IpClass.setmask1 + " gateway=" + IpClass.setgw);
-                RunCommand("interface ipv4 set address name=\"" + IpClass.NicName + "\" source =static addr=" + IpClass.setip1 + " mask=" + IpClass.setmask1 + " gateway=" + IpClass.setgw);
-            }
-
-            //如果ip和掩码都不为空，但是没网关，则设置ip地址和子网掩码
-            if (!string.IsNullOrEmpty(IpClass.setip1) && !string.IsNullOrEmpty(IpClass.setmask1) && string.IsNullOrEmpty(IpClass.setgw))
-            {
-                traceMessage.Items.Add("interface ipv4 set address name=\"" + IpClass.NicName + "\" source =static addr=" + IpClass.setip1 + " mask=" + IpClass.setmask1);
-                RunCommand("interface ipv4 set address name=\"" + IpClass.NicName + "\" source =static addr=" + IpClass.setip1 + " mask=" + IpClass.setmask1);
-            }
-
-            //如果有第二个IP和掩码且不为空，则加入第二个IP和掩码
-            if ((IpClass.Use2Ip) && !string.IsNullOrEmpty(IpClass.setip2) && !string.IsNullOrEmpty(IpClass.setmask2))
-            {
-                traceMessage.Items.Add("interface ipv4 add address name=" + IpClass.NicName + " addr=" + IpClass.setip2 + " mask=" + IpClass.setmask2);
-                RunCommand("interface ipv4 add address name=" + IpClass.NicName + " addr=" + IpClass.setip2 + " mask=" + IpClass.setmask2);
-            }
-
-            //如果任意一个DNS非空,那么设置DNS
-            if (!string.IsNullOrEmpty(IpClass.setdns1))
-            {
-                traceMessage.Items.Add("interface ipv4 set dns name=\"" + IpClass.NicName + "\" source =static addr=" + IpClass.setdns1 + " register=primary");
-                RunCommand("interface ipv4 set dns name=\"" + IpClass.NicName + "\" source =static addr=" + IpClass.setdns1 + " register=primary");
+                if (IpClass.lastUseDhcp || !IpClass.lastUse2Ip || IpClass.setip2 != IpClass.lastArray[6] || IpClass.setmask2 != IpClass.lastArray[7])
+                {
+                    //如果有第二个IP和掩码且不为空，则加入第二个IP和掩码
+                    if ((IpClass.Use2Ip) && !string.IsNullOrEmpty(IpClass.setip2) && !string.IsNullOrEmpty(IpClass.setmask2))
+                    {
+                        traceMessage.Items.Add("interface ipv4 add address \"" + IpClass.NicName + "\" " + IpClass.setip2 + " " + IpClass.setmask2);
+                        RunCommand("interface ipv4 add address \"" + IpClass.NicName + "\" " + IpClass.setip2 + " " + IpClass.setmask2);
+                    }
+                }
             }
             else
             {
-                RunCommand("interface ipv4 delete dns name=\"" + IpClass.NicName + "\" all");
+                if (IpClass.lastUse2Ip)
+                {
+                    //如果有第二个IP和掩码且不为空，则加入第二个IP和掩码
+
+                    traceMessage.Items.Add("interface ipv4 delete address \"" + IpClass.NicName + "\" " + IpClass.lastArray[6]);
+                    RunCommand("interface ipv4 delete address \"" + IpClass.NicName + "\" " + IpClass.lastArray[6]);
+                }
             }
-            if (!string.IsNullOrEmpty(IpClass.setdns2))
+
+            if (IpClass.lastUseDhcp || IpClass.setdns1 != IpClass.lastArray[4] || IpClass.setdns2 != IpClass.lastArray[5])
             {
-                traceMessage.Items.Add("interface ipv4 add dns name=\"" + IpClass.NicName + "\" addr=" + IpClass.setdns2);
-                RunCommand("interface ipv4 add dns name=\"" + IpClass.NicName + "\" addr=" + IpClass.setdns2);
+                //如果任意一个DNS非空,那么设置DNS
+                if (!string.IsNullOrEmpty(IpClass.setdns1))
+                {
+                    traceMessage.Items.Add("interface ipv4 set dns \"" + IpClass.NicName + "\" static " + IpClass.setdns1 + " register=primary");
+                    RunCommand("interface ipv4 set dns \"" + IpClass.NicName + "\" static " + IpClass.setdns1 + " register=primary");
+                }
+                else
+                {
+                    RunCommand("interface ipv4 delete dns \"" + IpClass.NicName + "\" all");
+                }
+
+                if (!string.IsNullOrEmpty(IpClass.setdns2))
+                {
+                    traceMessage.Items.Add("interface ipv4 add dns \"" + IpClass.NicName + "\" " + IpClass.setdns2);
+                    RunCommand("interface ipv4 add dns \"" + IpClass.NicName + "\" " + IpClass.setdns2);
+                }
             }
-            if (!IpClass.NicConnect) MessageBox.Show("当前网卡未激活，设置为静态IP后，仍可能仍然显示为DHCP模式，且多一个169的未获取ip状态的地址，当点亮网卡时候自动生效！");
             traceMessage.Items.Add("---------------------修改网卡结束-----------------------\r\n");
             SelectNetCard();
             ChangeUI();
@@ -835,7 +859,7 @@ namespace myipset
 
             foreach (NetConfig config in IpClass.netConfigDict.Values)
             {
-                string saveString = config.ToString();
+                string saveString = config.Writebackfile();
                 traceMessage.Items.Add("写入\t\t" + saveString);
                 sw.WriteLine(saveString);
             }
@@ -1070,14 +1094,14 @@ namespace myipset
             Form2 f2 = new Form2(config)
             { Owner = this };
 
-            f2.fangAnName.Text = this.FangAn.Text;
-            f2.textBoxip1.Text = this.textBoxip1.Text;
-            f2.textBoxmask1.Text = this.textBoxmask1.Text;
-            f2.textBoxgw.Text = this.textBoxgw.Text;
-            f2.textBoxdns1.Text = this.textBoxdns1.Text;
-            f2.textBoxdns2.Text = this.textBoxdns2.Text;
-            f2.textBoxip2.Text = this.textBoxip2.Text;
-            f2.textBoxmask2.Text = this.textBoxmask2.Text;
+            f2.fangAnName.Text = FangAn.Text;
+            f2.textBoxip1.Text = textBoxip1.Text;
+            f2.textBoxmask1.Text = textBoxmask1.Text;
+            f2.textBoxgw.Text = textBoxgw.Text;
+            f2.textBoxdns1.Text = textBoxdns1.Text;
+            f2.textBoxdns2.Text = textBoxdns2.Text;
+            f2.textBoxip2.Text = textBoxip2.Text;
+            f2.textBoxmask2.Text = textBoxmask2.Text;
             f2.Show();
         }
 
