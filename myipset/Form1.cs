@@ -240,7 +240,7 @@ namespace myipset
             //网卡不是dhcp则检查是否激活,不激活直接退出
             if (!IpClass.NicConnect)
             {
-                MessageBox.Show("当前网卡未激活，请激活网卡后再设置IP！");
+                MessageBox.Show("当前网卡未激活，请激活网卡后再设置静态IP！");
                 return false;
             }
 
@@ -255,7 +255,7 @@ namespace myipset
             //检查合格保存当前网卡状态，以备可以回退一次
             Savelastip();
 
-            //处理第一组IP掩码和网关
+            //处理第一组IP掩码和网关,有变化才改变,避免不必要的更改IP导致网络暂时中断
             if (IpClass.lastUseDhcp || IpClass.setip1 != IpClass.lastArray[1] || IpClass.setmask1 != IpClass.lastArray[2] || IpClass.setgw != IpClass.lastArray[3])
             {
                 //如果ip、掩码和网关都不为空,则设置ip地址和子网掩码和网关
@@ -297,6 +297,7 @@ namespace myipset
                 }
             }
 
+            //处理DNS
             if (IpClass.lastUseDhcp || IpClass.setdns1 != IpClass.lastArray[4] || IpClass.setdns2 != IpClass.lastArray[5])
             {
                 //如果任意一个DNS非空,那么设置DNS
@@ -949,13 +950,7 @@ namespace myipset
 
                 //处理IP和掩码,最多2组IPv4
                 int index1 = 0;
-                IpClass.lastArray[1] = "";
-                IpClass.lastArray[2] = "";
-                IpClass.lastArray[3] = "";
-                IpClass.lastArray[4] = "";
-                IpClass.lastArray[5] = "";
-                IpClass.lastArray[6] = "";
-                IpClass.lastArray[7] = "";
+                Array.Clear(IpClass.lastArray, 0, IpClass.lastArray.Length);
                 foreach (UnicastIPAddressInformation ipadd in netIpAdds)
                 {
                     if (ipadd.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork) //判断ipV4
@@ -1043,7 +1038,7 @@ namespace myipset
 
         private void 编辑ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            string name = this.FangAn.Text;
+            string name = FangAn.Text;
             if (string.IsNullOrEmpty(name) || !IpClass.netConfigDict.ContainsKey(name))
             {
                 return;
@@ -1056,21 +1051,21 @@ namespace myipset
             foreach (NetConfig cfg in IpClass.netConfigDict.Values)
             { f2.fangAnName.Items.Add(cfg.Name); }
 
-            f2.fangAnName.Text = this.FangAn.Text;
-            f2.textBoxip1.Text = this.textBoxip1.Text;
-            f2.textBoxmask1.Text = this.textBoxmask1.Text;
-            f2.textBoxgw.Text = this.textBoxgw.Text;
-            f2.textBoxdns1.Text = this.textBoxdns1.Text;
-            f2.textBoxdns2.Text = this.textBoxdns2.Text;
-            f2.textBoxip2.Text = this.textBoxip2.Text;
-            f2.textBoxmask2.Text = this.textBoxmask2.Text;
+            f2.fangAnName.Text = FangAn.Text;
+            f2.textBoxip1.Text = textBoxip1.Text;
+            f2.textBoxmask1.Text = textBoxmask1.Text;
+            f2.textBoxgw.Text = textBoxgw.Text;
+            f2.textBoxdns1.Text = textBoxdns1.Text;
+            f2.textBoxdns2.Text = textBoxdns2.Text;
+            f2.textBoxip2.Text = textBoxip2.Text;
+            f2.textBoxmask2.Text = textBoxmask2.Text;
             f2.Show();
         }
 
         private void 参考ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             string name = FangAn.Text;
-            if (!string.IsNullOrEmpty(name))
+            if (!string.IsNullOrEmpty(name) && name != "自动获取地址" && name != "当前使用地址" && name != "上次使用地址")
             {
                 NetConfig config = IpClass.netConfigDict[name];
                 textBoxip1.Text = config.IP1;
@@ -1129,13 +1124,13 @@ namespace myipset
             if (!string.IsNullOrEmpty(name))
             {
                 NetConfig config = IpClass.netConfigDict[name];
-                config.IP1 = this.textBoxip1.Text;
-                config.Mask1 = this.textBoxmask1.Text;
-                config.Gateway = this.textBoxgw.Text;
-                config.DNS1 = this.textBoxdns1.Text;
-                config.DNS2 = this.textBoxdns2.Text;
-                config.IP2 = this.textBoxip2.Text;
-                config.Mask2 = this.textBoxmask2.Text;
+                config.IP1 = textBoxip1.Text;
+                config.Mask1 = textBoxmask1.Text;
+                config.Gateway = textBoxgw.Text;
+                config.DNS1 = textBoxdns1.Text;
+                config.DNS2 = textBoxdns2.Text;
+                config.IP2 = textBoxip2.Text;
+                config.Mask2 = textBoxmask2.Text;
             }
             SaveConfig();
         }
