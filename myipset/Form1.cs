@@ -1097,7 +1097,7 @@ namespace myipset
             f2.textBoxdns2.Text = textBoxdns2.Text;
             f2.textBoxip2.Text = textBoxip2.Text;
             f2.textBoxmask2.Text = textBoxmask2.Text;
-            f2.Show();
+            f2.Show(); 
         }
 
         private void 删除ToolStripMenuItem_Click(object sender, EventArgs e)
