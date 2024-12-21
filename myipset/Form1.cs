@@ -822,31 +822,30 @@ namespace myipset
                 File.Create("config.cfg").Close();
             }
 
-            StreamReader sr = File.OpenText("config.cfg");
-            IpClass.configfile = sr.ReadToEnd();
-            sr.Close();
+            using (StreamReader sr = File.OpenText("config.cfg"))
+            {
+                IpClass.configfile = sr.ReadToEnd();
+            }
 
             //去掉回车和换行符
-            IpClass.configfile = (IpClass.configfile.Replace("\n", ""));
-            IpClass.configfile = (IpClass.configfile.Replace("\r", ""));
+            IpClass.configfile = IpClass.configfile.Replace("\n", "").Replace("\r", "");
 
             //每个方案用|隔开，每个方案的具体地IP用#隔开，用分隔符读取多个方案
-            string[] configArray = IpClass.configfile.Split(new char[] { '|' });
+            string[] configArray = IpClass.configfile.Split('|');
             foreach (string config in configArray)
             {
                 if (config.Length > 0)
                 {
                     NetConfig nc = new NetConfig(config);
                     IpClass.netConfigDict.Add(nc.Name, nc);
-                    //traceMessage.Items.Add(config);
-                    traceMessage.Items.Add("========== 方案:" + nc.Name + " ==========");
-                    traceMessage.Items.Add("IP地址\t\t" + (nc.IP1 == "" ? "无" : nc.IP1));      //测试等于空先
-                    traceMessage.Items.Add("IP掩码\t\t" + (nc.Mask1 != "" ? nc.Mask1 : "无"));   //测试不等于空先
-                    traceMessage.Items.Add("IP网关\t\t" + (nc.Gateway != "" ? nc.Gateway : "无"));
-                    traceMessage.Items.Add("首选DNS\t\t" + (nc.DNS1 != "" ? nc.DNS1 : "无"));
-                    traceMessage.Items.Add("备选DNS\t\t" + (nc.DNS2 != "" ? nc.DNS2 : "无"));
-                    traceMessage.Items.Add("IP地址2\t\t" + (nc.IP2 != "" ? nc.IP2 : "无"));
-                    traceMessage.Items.Add("IP掩码2\t\t" + (nc.Mask2 != "" ? nc.Mask2 : "无"));
+                    traceMessage.Items.Add($"========== 方案:{nc.Name} ==========");
+                    traceMessage.Items.Add($"IP地址\t\t{(nc.IP1 == "" ? "无" : nc.IP1)}");
+                    traceMessage.Items.Add($"IP掩码\t\t{(nc.Mask1 != "" ? nc.Mask1 : "无")}");
+                    traceMessage.Items.Add($"IP网关\t\t{(nc.Gateway != "" ? nc.Gateway : "无")}");
+                    traceMessage.Items.Add($"首选DNS\t\t{(nc.DNS1 != "" ? nc.DNS1 : "无")}");
+                    traceMessage.Items.Add($"备选DNS\t\t{(nc.DNS2 != "" ? nc.DNS2 : "无")}");
+                    traceMessage.Items.Add($"IP地址2\t\t{(nc.IP2 != "" ? nc.IP2 : "无")}");
+                    traceMessage.Items.Add($"IP掩码2\t\t{(nc.Mask2 != "" ? nc.Mask2 : "无")}");
                     FangAn.Items.Add(nc.Name);
                 }
             }
@@ -1142,27 +1141,17 @@ namespace myipset
 
         private async void ButtonMAC_change_Click(object sender, EventArgs e)
         {
-            DialogResult result = MessageBox.Show("网络将断开，IP可能会改变，不重启可能不生效，确认更改？", "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-            if (result == DialogResult.Yes)
+            if (ConfirmMacChange())
             {
-                SetMACAddress(IpClass.NicDescript, CreateNewMacAddress());
-                DisableNetWork(NetWork(comboBoxnet.SelectedValue.ToString()));
-                EnableNetWork(NetWork(comboBoxnet.SelectedValue.ToString()));
-                await Task.Run(() => Thread.Sleep(9000));
-                SelectNetCard();
+                await ChangeMacAddressAsync(CreateNewMacAddress());
             }
         }
 
         private async void ButtonMAC_restore_Click(object sender, EventArgs e)
         {
-            DialogResult result = MessageBox.Show("网络将断开，IP可能会改变，不重启可能不生效，确认更改？", "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-            if (result == DialogResult.Yes)
+            if (ConfirmMacChange())
             {
-                SetMACAddress(IpClass.NicDescript, "");
-                DisableNetWork(NetWork(comboBoxnet.SelectedValue.ToString()));
-                EnableNetWork(NetWork(comboBoxnet.SelectedValue.ToString()));
-                await Task.Run(() => Thread.Sleep(9000));
-                SelectNetCard();
+                await ChangeMacAddressAsync("");
             }
         }
 
@@ -1173,15 +1162,26 @@ namespace myipset
                 MessageBox.Show("输入的MAC地址不合法，本次更改无效");
                 return;
             }
-            DialogResult result = MessageBox.Show("网络将断开，IP可能会改变，不重启可能不生效，确认更改？", "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-            if (result == DialogResult.Yes)
+            if (ConfirmMacChange())
             {
-                SetMACAddress(IpClass.NicDescript, textBoxMAC.Text);
-                DisableNetWork(NetWork(comboBoxnet.SelectedValue.ToString()));
-                EnableNetWork(NetWork(comboBoxnet.SelectedValue.ToString()));
-                await Task.Run(() => Thread.Sleep(9000));
-                SelectNetCard();
+                await ChangeMacAddressAsync(textBoxMAC.Text);
             }
         }
+
+        private bool ConfirmMacChange()
+        {
+            DialogResult result = MessageBox.Show("网络将断开，IP可能会改变，不重启可能不生效，确认更改？", "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            return result == DialogResult.Yes;
+        }
+
+        private async Task ChangeMacAddressAsync(string newMac)
+        {
+            SetMACAddress(IpClass.NicDescript, newMac);
+            DisableNetWork(NetWork(comboBoxnet.SelectedValue.ToString()));
+            EnableNetWork(NetWork(comboBoxnet.SelectedValue.ToString()));
+            await Task.Delay(9000);
+            SelectNetCard();
+        }
+
     }
 }
