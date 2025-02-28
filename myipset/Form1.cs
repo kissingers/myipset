@@ -226,10 +226,10 @@ namespace myipset
             //如果是地址是自动获取的,上面已经修改为dhcp模式了,完成任务直接结束
             if (IpClass.UseDhcp)
             {
-                traceMessage.Items.Add("运行命令 netsh interface ip set address name =" + IpClass.NicName + " source = dhcp");
-                traceMessage.Items.Add("运行命令 netsh interface ip set dns name =" + IpClass.NicName + " source = dhcp");
-                RunCommand("interface ip set address name =" + IpClass.NicName + " source = dhcp");
-                RunCommand("interface ip set dns name =" + IpClass.NicName + " source = dhcp");
+                traceMessage.Items.Add("netsh interface ip set address name=\"" + IpClass.NicName + "\" source=dhcp");
+                traceMessage.Items.Add("netsh interface ip set dns name=\"" + IpClass.NicName + "\" source=dhcp");
+                RunNetshCommand("interface ip set address name=\"" + IpClass.NicName + "\" source=dhcp");
+                RunNetshCommand("interface ip set dns name=\"" + IpClass.NicName + "\" source=dhcp");
                 traceMessage.Items.Add("-----------------修改网卡动态获取地址结束-------------------\r\n");
                 SelectNetCard();
                 ChangeUI();
@@ -261,15 +261,15 @@ namespace myipset
                 //如果ip、掩码和网关都不为空,则设置ip地址和子网掩码和网关
                 if (!string.IsNullOrEmpty(IpClass.setip1) && !string.IsNullOrEmpty(IpClass.setmask1) && !string.IsNullOrEmpty(IpClass.setgw))
                 {
-                    traceMessage.Items.Add("interface ipv4 set address \"" + IpClass.NicName + "\" static " + IpClass.setip1 + " " + IpClass.setmask1 + " " + IpClass.setgw);
-                    RunCommand("interface ipv4 set address \"" + IpClass.NicName + "\" static " + IpClass.setip1 + " " + IpClass.setmask1 + " " + IpClass.setgw);
+                    traceMessage.Items.Add("netsh interface ipv4 set address \"" + IpClass.NicName + "\" static " + IpClass.setip1 + " " + IpClass.setmask1 + " " + IpClass.setgw);
+                    RunNetshCommand("interface ipv4 set address \"" + IpClass.NicName + "\" static " + IpClass.setip1 + " " + IpClass.setmask1 + " " + IpClass.setgw);
                 }
 
                 //如果ip和掩码都不为空，但是没网关，则设置ip地址和子网掩码
                 if (!string.IsNullOrEmpty(IpClass.setip1) && !string.IsNullOrEmpty(IpClass.setmask1) && string.IsNullOrEmpty(IpClass.setgw))
                 {
-                    traceMessage.Items.Add("interface ipv4 set address \"" + IpClass.NicName + "\" static " + IpClass.setip1 + " " + IpClass.setmask1);
-                    RunCommand("interface ipv4 set address \"" + IpClass.NicName + "\" static " + IpClass.setip1 + " " + IpClass.setmask1);
+                    traceMessage.Items.Add("netsh interface ipv4 set address \"" + IpClass.NicName + "\" static " + IpClass.setip1 + " " + IpClass.setmask1);
+                    RunNetshCommand("interface ipv4 set address \"" + IpClass.NicName + "\" static " + IpClass.setip1 + " " + IpClass.setmask1);
                 }
             }
 
@@ -281,8 +281,8 @@ namespace myipset
                     //如果有第二个IP和掩码且不为空，则加入第二个IP和掩码
                     if ((IpClass.Use2Ip) && !string.IsNullOrEmpty(IpClass.setip2) && !string.IsNullOrEmpty(IpClass.setmask2))
                     {
-                        traceMessage.Items.Add("interface ipv4 add address \"" + IpClass.NicName + "\" " + IpClass.setip2 + " " + IpClass.setmask2);
-                        RunCommand("interface ipv4 add address \"" + IpClass.NicName + "\" " + IpClass.setip2 + " " + IpClass.setmask2);
+                        traceMessage.Items.Add("netsh interface ipv4 add address \"" + IpClass.NicName + "\" " + IpClass.setip2 + " " + IpClass.setmask2);
+                        RunNetshCommand("interface ipv4 add address \"" + IpClass.NicName + "\" " + IpClass.setip2 + " " + IpClass.setmask2);
                     }
                 }
             }
@@ -292,8 +292,8 @@ namespace myipset
                 {
                     //如果有第二个IP和掩码且不为空，则加入第二个IP和掩码
 
-                    traceMessage.Items.Add("interface ipv4 delete address \"" + IpClass.NicName + "\" " + IpClass.lastArray[6]);
-                    RunCommand("interface ipv4 delete address \"" + IpClass.NicName + "\" " + IpClass.lastArray[6]);
+                    traceMessage.Items.Add("netsh interface ipv4 delete address \"" + IpClass.NicName + "\" " + IpClass.lastArray[6]);
+                    RunNetshCommand("interface ipv4 delete address \"" + IpClass.NicName + "\" " + IpClass.lastArray[6]);
                 }
             }
 
@@ -303,18 +303,19 @@ namespace myipset
                 //如果任意一个DNS非空,那么设置DNS
                 if (!string.IsNullOrEmpty(IpClass.setdns1))
                 {
-                    traceMessage.Items.Add("interface ipv4 set dns \"" + IpClass.NicName + "\" static " + IpClass.setdns1 + " register=primary");
-                    RunCommand("interface ipv4 set dns \"" + IpClass.NicName + "\" static " + IpClass.setdns1 + " register=primary");
+                    traceMessage.Items.Add("netsh interface ipv4 set dns \"" + IpClass.NicName + "\" static " + IpClass.setdns1 + " register=primary");
+                    RunNetshCommand("interface ipv4 set dns \"" + IpClass.NicName + "\" static " + IpClass.setdns1 + " register=primary");
                 }
                 else
                 {
-                    RunCommand("interface ipv4 delete dns \"" + IpClass.NicName + "\" all");
+                    traceMessage.Items.Add("netsh interface ipv4 delete dns \"" + IpClass.NicName + "\" all");
+                    RunNetshCommand("interface ipv4 delete dns \"" + IpClass.NicName + "\" all");
                 }
 
                 if (!string.IsNullOrEmpty(IpClass.setdns2))
                 {
                     traceMessage.Items.Add("interface ipv4 add dns \"" + IpClass.NicName + "\" " + IpClass.setdns2);
-                    RunCommand("interface ipv4 add dns \"" + IpClass.NicName + "\" " + IpClass.setdns2);
+                    RunNetshCommand("interface ipv4 add dns \"" + IpClass.NicName + "\" " + IpClass.setdns2);
                 }
             }
             traceMessage.Items.Add("---------------------修改网卡结束-----------------------\r\n");
@@ -788,25 +789,31 @@ namespace myipset
             traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
         }
 
-        /// Process类执行DOS命令netsh
-        private string RunCommand(string command)
+        private void RunNetshCommand(string command)
         {
-            string returnStr;
-            //实例一个新的process类,启动一个新的进程
-            Process p = new Process();
-            //Process类有一个StartInfo属性
-            p.StartInfo.FileName = "netsh.exe";  //设定程序名
-            p.StartInfo.Arguments = command;            //设定程式执行参数
-            p.StartInfo.Verb = "runas";
-            p.StartInfo.UseShellExecute = false;        //关闭Shell的显示
-            p.StartInfo.RedirectStandardInput = true;   //重定向标准输入
-            p.StartInfo.RedirectStandardOutput = true;  //重定向标准输出
-            p.StartInfo.RedirectStandardError = true;   //重定向错误输出
-            p.StartInfo.CreateNoWindow = true;          //设置不显示窗口
-            p.Start();                                  //启动
-            returnStr = p.StandardOutput.ReadToEnd();     //赋值
-            p.Dispose();                                //释放资源
-            return returnStr;        //从输出流取得命令执行结果
+            using (Process process = new Process())
+            {
+                process.StartInfo.FileName = "netsh.exe";
+                process.StartInfo.Arguments = command;
+                process.StartInfo.UseShellExecute = false;
+                process.StartInfo.RedirectStandardOutput = true;
+                process.StartInfo.RedirectStandardError = true;
+                process.StartInfo.CreateNoWindow = true;
+
+                process.Start();
+                string output = process.StandardOutput.ReadToEnd();
+                string error = process.StandardError.ReadToEnd();
+                process.WaitForExit();
+
+                if (!string.IsNullOrEmpty(error))
+                {
+                    Console.WriteLine("Error: " + error);
+                }
+                else
+                {
+                    Console.WriteLine("Output: " + output);
+                }
+            }
         }
 
         //读取配置文件 config.cfg 然后生成一个配置方案的下拉集合
