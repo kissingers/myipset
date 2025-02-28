@@ -314,7 +314,7 @@ namespace myipset
 
                 if (!string.IsNullOrEmpty(IpClass.setdns2))
                 {
-                    traceMessage.Items.Add("interface ipv4 add dns \"" + IpClass.NicName + "\" " + IpClass.setdns2);
+                    traceMessage.Items.Add("netsh interface ipv4 add dns \"" + IpClass.NicName + "\" " + IpClass.setdns2);
                     RunNetshCommand("interface ipv4 add dns \"" + IpClass.NicName + "\" " + IpClass.setdns2);
                 }
             }
