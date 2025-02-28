@@ -17,7 +17,6 @@ namespace myipset
         public static string NicName = "";
         public static string NicDefaultName = "以太网";
         public static string NicDescript = "";
-        public static string NicMAC = "";
         public static string setip1 = "";
         public static string setmask1 = "";
         public static string setgw = "";

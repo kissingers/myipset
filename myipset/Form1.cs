@@ -108,12 +108,16 @@ namespace myipset
                 {
                     traceMessage.Items.Add("网卡类型：有线网卡");
                     traceMessage.Items.Add("自动获取：" + ip.GetIPv4Properties().IsDhcpEnabled);
+                    traceMessage.Items.Add("IPV4MTU：" + ip.GetIPv4Properties().Mtu);
+                    traceMessage.Items.Add("IPV6MTU：" + ip.GetIPv6Properties().Mtu);
                 }
 
                 if (adapter.NetworkInterfaceType == NetworkInterfaceType.Wireless80211)
                 {
                     traceMessage.Items.Add("网卡类型：无线网卡");
                     traceMessage.Items.Add("自动获取：" + ip.GetIPv4Properties().IsDhcpEnabled);
+                    traceMessage.Items.Add("IPV4MTU：" + ip.GetIPv4Properties().Mtu);
+                    traceMessage.Items.Add("IPV6MTU：" + ip.GetIPv6Properties().Mtu);
                 }
 
                 UnicastIPAddressInformationCollection netIpAdds = ip.UnicastAddresses;
@@ -156,16 +160,15 @@ namespace myipset
                 IpClass.NiceEnable = true;    //匹配成功说明网卡起来了,读取网卡信息
 
                 IPInterfaceProperties ip = adapter.GetIPProperties();
-                IPv4InterfaceProperties ipstats = ip.GetIPv4Properties();
                 UnicastIPAddressInformationCollection netIpAdds = ip.UnicastAddresses;
                 GatewayIPAddressInformationCollection gatewayIpAdds = ip.GatewayAddresses;
                 IPAddressCollection dnsServers = ip.DnsAddresses;
 
                 IpClass.NicName = adapter.Name;                 //如果匹配先保存网卡名字和描述到ip临时表
                 IpClass.NicDescript = adapter.Description;
-                IpClass.NicMAC = adapter.GetPhysicalAddress().ToString();
-                textBoxMAC.Text = IpClass.NicMAC;
-                IpClass.UseDhcp = ipstats.IsDhcpEnabled;
+                textBoxMAC.Text = adapter.GetPhysicalAddress().ToString();
+                textBoxMTU.Text = ip.GetIPv4Properties().Mtu.ToString();
+                IpClass.UseDhcp = ip.GetIPv4Properties().IsDhcpEnabled;
                 if (adapter.OperationalStatus == OperationalStatus.Up)
                 {
                     IpClass.NicConnect = true;
@@ -314,8 +317,9 @@ namespace myipset
 
                 if (!string.IsNullOrEmpty(IpClass.setdns2))
                 {
-                    traceMessage.Items.Add("netsh interface ipv4 add dns \"" + IpClass.NicName + "\" " + IpClass.setdns2);
-                    RunNetshCommand("interface ipv4 add dns \"" + IpClass.NicName + "\" " + IpClass.setdns2);
+                    string DNS2Command = $"interface ipv4 add dns \"{IpClass.NicName}\" {IpClass.setdns2}";
+                    traceMessage.Items.Add("netsh " + DNS2Command);
+                    RunNetshCommand(DNS2Command);
                 }
             }
             traceMessage.Items.Add("---------------------修改网卡结束-----------------------\r\n");
@@ -504,32 +508,43 @@ namespace myipset
             return true;
         }
 
-        public void SetMACAddress(string nicName, string newMac)
+        public void SetMACAddress(string newMac)
         {
-            //所有网卡物理信息所在位置
-            RegistryKey NetaddaptRegistry = Registry.LocalMachine.OpenSubKey("SYSTEM").OpenSubKey("CurrentControlSet")
-                .OpenSubKey("Control").OpenSubKey("Class").OpenSubKey("{4D36E972-E325-11CE-BFC1-08002bE10318}");
-            string[] subPatchNames = NetaddaptRegistry.GetSubKeyNames();    //获取所有子项名称
-            foreach (string PatchName in subPatchNames)
+            //用此方法获取注册表内物理网卡的ID
+            string DeviceId = "";
+            string netState = "SELECT * From Win32_NetworkAdapter  where PhysicalAdapter=1";
+            ManagementObjectSearcher searcher = new ManagementObjectSearcher(netState);
+            ManagementObjectCollection collection = searcher.Get();
+            foreach (ManagementObject manage in collection.Cast<ManagementObject>())
             {
-                try
+                if (manage["NetConnectionID"].ToString() == comboBoxnet.SelectedValue.ToString())  //直接用列表名匹配
                 {
-                    //MessageBox.Show(PatchName);
-                    RegistryKey macRegistry = NetaddaptRegistry.OpenSubKey(PatchName, true);
-                    if (macRegistry.GetValue("DriverDesc", true).ToString() == nicName)
-                    {
-                        //MessageBox.Show("新的MAC地址为: "+ newMac);
-                        if (string.IsNullOrEmpty(newMac))
-                        { macRegistry.DeleteValue("NetworkAddress"); }
-                        else
-                        { macRegistry.SetValue("NetworkAddress", newMac); }
-                        macRegistry.Close();
-                        break;
-                    }
-                    macRegistry.Close();
+                    DeviceId = int.Parse(manage["DeviceId"].ToString()).ToString("D4");
+                    //MessageBox.Show(DeviceId);
                 }
-                catch { }
             }
+            if (DeviceId == "")
+            {
+                return;
+            }
+
+            //所有网卡物理信息所在位置
+            RegistryKey NetaddaptRegistry = Registry.LocalMachine.OpenSubKey("SYSTEM")
+                .OpenSubKey("CurrentControlSet")
+                .OpenSubKey("Control")
+                .OpenSubKey("Class")
+                .OpenSubKey("{4D36E972-E325-11CE-BFC1-08002bE10318}")
+                .OpenSubKey(DeviceId, true);
+            //MessageBox.Show("新的MAC地址为: "+ newMac);
+            if (string.IsNullOrEmpty(newMac))
+            {
+                NetaddaptRegistry.DeleteValue("NetworkAddress");
+            }
+            else
+            {
+                NetaddaptRegistry.SetValue("NetworkAddress", newMac);
+            }
+            NetaddaptRegistry.Close();
         }
 
         // 生成随机MAC地址
@@ -947,12 +962,11 @@ namespace myipset
                     continue;        //处理下拉列表,和前面读取的表项比较如果不匹配就继续匹配
 
                 IPInterfaceProperties ip = adapter.GetIPProperties();
-                IPv4InterfaceProperties ipstats = ip.GetIPv4Properties();
                 UnicastIPAddressInformationCollection netIpAdds = ip.UnicastAddresses;
                 GatewayIPAddressInformationCollection gatewayIpAdds = ip.GatewayAddresses;
                 IPAddressCollection dnsServers = ip.DnsAddresses;
 
-                IpClass.lastUseDhcp = ipstats.IsDhcpEnabled;
+                IpClass.lastUseDhcp = ip.GetIPv4Properties().IsDhcpEnabled;
 
                 //处理IP和掩码,最多2组IPv4
                 int index1 = 0;
@@ -1183,12 +1197,57 @@ namespace myipset
 
         private async Task ChangeMacAddressAsync(string newMac)
         {
-            SetMACAddress(IpClass.NicDescript, newMac);
+            SetMACAddress(newMac);
             DisableNetWork(NetWork(comboBoxnet.SelectedValue.ToString()));
             EnableNetWork(NetWork(comboBoxnet.SelectedValue.ToString()));
-            await Task.Delay(9000);
+            await Task.Delay(9000);     //等待9秒差不多可以重启网卡,并刷新DHCP的IP
             SelectNetCard();
+            ChangeUI();
         }
 
+        private void ButtonMTU_self_Click(object sender, EventArgs e)
+        {
+            // 尝试将文本转换为整数
+            if (int.TryParse(textBoxMTU.Text, out int mtuValue))
+            {
+                // 检查 MTU 值是否在 64 到 9600 之间
+                if (mtuValue >= 64 && mtuValue <= 9600)
+                {
+                    // 设置 IPv4 MTU
+                    string ipv4Command = $"interface ipv4 set subinterface \"{IpClass.NicName}\" mtu={mtuValue} store=persistent";
+                    traceMessage.Items.Add("netsh " + ipv4Command);
+                    RunNetshCommand(ipv4Command);
+
+                    // 设置 IPv6 MTU
+                    string ipv6Command = $"interface ipv6 set subinterface \"{IpClass.NicName}\" mtu={mtuValue} store=persistent";
+                    traceMessage.Items.Add("netsh " + ipv6Command);
+                    RunNetshCommand(ipv6Command);
+                    SelectNetCard();
+                    ChangeUI();
+                }
+                else
+                {
+                    MessageBox.Show("MTU 值必须在 64 到 9600 之间。");
+                }
+            }
+            else
+            {
+                MessageBox.Show("请输入一个有效的整数作为 MTU 值。");
+            }
+        }
+
+        private void buttonMTU_restore_Click(object sender, EventArgs e)
+        {
+            string ipv4Command = $"interface ipv4 set subinterface \"{IpClass.NicName}\" mtu=1500 store=persistent";
+            traceMessage.Items.Add("netsh " + ipv4Command);
+            RunNetshCommand(ipv4Command);
+
+            // 设置 IPv6 MTU
+            string ipv6Command = $"interface ipv6 set subinterface \"{IpClass.NicName}\" mtu=1500 store=persistent";
+            traceMessage.Items.Add("netsh " + ipv6Command);
+            RunNetshCommand(ipv6Command);
+            SelectNetCard();
+            ChangeUI();
+        }
     }
 }
