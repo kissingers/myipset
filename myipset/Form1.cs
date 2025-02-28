@@ -788,24 +788,26 @@ namespace myipset
         //显示当前路由表
         public void ShowRoute()
         {
+            traceMessage.Items.Add("-----------------------------------------------------------------");
+            traceMessage.Items.Add("目的地址\t\t掩码\t\t下一跳\t\t接口\t代价");
             ManagementClass isrouteClass = new ManagementClass("Win32_IP4RouteTable");
             ManagementObjectCollection routeColl = isrouteClass.GetInstances();
             foreach (ManagementObject mor in routeColl.Cast<ManagementObject>())
             {
-                if (mor["Destination"].ToString().Length < 9)
-                {
-                    if (mor["Mask"].ToString().Length < 9)
-                        traceMessage.Items.Add(mor["Destination"] + "\t\t" + mor["Mask"] + "\t\t下一跳:\t" + mor["NextHop"] + "\t接口:" + mor["InterfaceIndex"] + "\t代价:" + mor["Metric1"]);
-                    else
-                        traceMessage.Items.Add(mor["Destination"] + "\t\t" + mor["Mask"] + "\t下一跳:\t" + mor["NextHop"] + "\t接口:" + mor["InterfaceIndex"] + "\t代价:" + mor["Metric1"]);
-                }
-                else
-                {
-                    if (mor["Mask"].ToString().Length < 9)
-                        traceMessage.Items.Add(mor["Destination"] + "\t" + mor["Mask"] + "\t\t下一跳:\t" + mor["NextHop"] + "\t接口:" + mor["InterfaceIndex"] + "\t代价:" + mor["Metric1"]);
-                    else
-                        traceMessage.Items.Add(mor["Destination"] + "\t" + mor["Mask"] + "\t下一跳:\t" + mor["NextHop"] + "\t接口:" + mor["InterfaceIndex"] + "\t代价:" + mor["Metric1"]);
-                }
+                string routemessage = routemessage = mor["Destination"] + "\t";
+                if (mor["Destination"].ToString().Length < 8)
+                    routemessage = routemessage + "\t";
+
+                routemessage = routemessage + mor["Mask"] + "\t";
+                if (mor["Mask"].ToString().Length < 8)
+                    routemessage = routemessage + "\t";
+
+                routemessage = routemessage + mor["NextHop"] + "\t";
+                if (mor["NextHop"].ToString().Length < 8)
+                    routemessage = routemessage + "\t";
+
+                routemessage = routemessage + mor["InterfaceIndex"] + "\t" + mor["Metric1"];
+                traceMessage.Items.Add(routemessage);
             }
             traceMessage.Items.Add("-----------------------------------------------------------------");
             traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
