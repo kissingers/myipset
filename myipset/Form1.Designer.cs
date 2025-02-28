@@ -72,6 +72,7 @@
             this.buttonMTU_restore = new System.Windows.Forms.Button();
             this.textBoxMTU = new System.Windows.Forms.TextBox();
             this.button_MTU = new System.Windows.Forms.Button();
+            this.buttonChangeName = new System.Windows.Forms.Button();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -293,7 +294,7 @@
             this.buttonnicenable.ForeColor = System.Drawing.SystemColors.ControlText;
             this.buttonnicenable.Location = new System.Drawing.Point(371, 20);
             this.buttonnicenable.Name = "buttonnicenable";
-            this.buttonnicenable.Size = new System.Drawing.Size(91, 37);
+            this.buttonnicenable.Size = new System.Drawing.Size(67, 37);
             this.buttonnicenable.TabIndex = 23;
             this.buttonnicenable.Text = "默认";
             this.buttonnicenable.UseVisualStyleBackColor = false;
@@ -430,9 +431,9 @@
             // 
             this.button_showroute.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.button_showroute.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.button_showroute.Location = new System.Drawing.Point(470, 20);
+            this.button_showroute.Location = new System.Drawing.Point(517, 20);
             this.button_showroute.Name = "button_showroute";
-            this.button_showroute.Size = new System.Drawing.Size(129, 37);
+            this.button_showroute.Size = new System.Drawing.Size(82, 37);
             this.button_showroute.TabIndex = 36;
             this.button_showroute.Text = "查路由";
             this.button_showroute.UseVisualStyleBackColor = false;
@@ -491,11 +492,24 @@
             this.button_MTU.Text = "当前MTU";
             this.button_MTU.UseVisualStyleBackColor = true;
             // 
+            // buttonChangeName
+            // 
+            this.buttonChangeName.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.buttonChangeName.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.buttonChangeName.Location = new System.Drawing.Point(444, 20);
+            this.buttonChangeName.Name = "buttonChangeName";
+            this.buttonChangeName.Size = new System.Drawing.Size(67, 37);
+            this.buttonChangeName.TabIndex = 41;
+            this.buttonChangeName.Text = "改名";
+            this.buttonChangeName.UseVisualStyleBackColor = false;
+            this.buttonChangeName.Click += new System.EventHandler(this.buttonChangeName_Click);
+            // 
             // Form1
             // 
             this.AcceptButton = this.buttonapply;
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
             this.ClientSize = new System.Drawing.Size(1139, 661);
+            this.Controls.Add(this.buttonChangeName);
             this.Controls.Add(this.buttonMTU_self);
             this.Controls.Add(this.buttonMTU_restore);
             this.Controls.Add(this.textBoxMTU);
@@ -586,6 +600,7 @@
         private System.Windows.Forms.Button buttonMTU_restore;
         public System.Windows.Forms.TextBox textBoxMTU;
         private System.Windows.Forms.Button button_MTU;
+        private System.Windows.Forms.Button buttonChangeName;
     }
 }
 

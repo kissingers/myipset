@@ -63,6 +63,7 @@ namespace myipset
         // 网卡列表,这个方法只显示真的的物理网卡列表
         public void NetWorkList()
         {
+            //netWorkList.Clear();
             string qry = "SELECT * FROM MSFT_NetAdapter WHERE Virtual=False";
             ManagementScope scope = new ManagementScope(@"\\.\ROOT\StandardCimv2");
             ObjectQuery query = new ObjectQuery(qry);
@@ -145,6 +146,12 @@ namespace myipset
         // 选择网卡下拉列表时候显示对应的网卡
         public void SelectNetCard()
         {
+            if (comboBoxnet.SelectedValue == null)
+            {
+                MessageBox.Show("请选择网卡下拉列表重新刷新，不存在网卡名: "+ comboBoxnet.Text);
+                return;
+            }
+
             IpClass.NiceEnable = false;
             IpClass.UseDhcp = false;
             IpClass.NicConnect = false;
@@ -153,7 +160,7 @@ namespace myipset
             NetworkInterface[] adapters = NetworkInterface.GetAllNetworkInterfaces();
             foreach (NetworkInterface adapter in adapters)
             {
-                if (!(adapter.Name == comboBoxnet.SelectedValue.ToString()))
+                if (adapter.Name != comboBoxnet.SelectedValue.ToString())
                     continue;        //处理下拉列表,和前面读取的表项比较如果不匹配就继续匹配
 
                 labelnicdes.Text = adapter.Description;
@@ -1248,6 +1255,14 @@ namespace myipset
             RunNetshCommand(ipv6Command);
             SelectNetCard();
             ChangeUI();
+        }
+
+        private void buttonChangeName_Click(object sender, EventArgs e)
+        {
+            string ChangeNameCommand = $"interface set interface name=\"{IpClass.NicName}\" newname=\"{comboBoxnet.Text}\""; 
+            traceMessage.Items.Add("netsh " + ChangeNameCommand);
+            RunNetshCommand(ChangeNameCommand);
+            NetWorkList();
         }
     }
 }
