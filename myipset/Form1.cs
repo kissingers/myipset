@@ -232,6 +232,9 @@ namespace myipset
         // 设置网卡ip地址
         public bool SetNetworkAdapter()
         {
+            //检查合格保存当前网卡状态，以备可以回退一次
+            Savelastip();
+
             //如果是地址是自动获取的,上面已经修改为dhcp模式了,完成任务直接结束
             if (IpClass.UseDhcp)
             {
@@ -261,8 +264,6 @@ namespace myipset
                 return false;
             }
 
-            //检查合格保存当前网卡状态，以备可以回退一次
-            Savelastip();
 
             //处理第一组IP掩码和网关,有变化才改变,避免不必要的更改IP导致网络暂时中断
             if (IpClass.lastUseDhcp || IpClass.setip1 != IpClass.lastArray[1] || IpClass.setmask1 != IpClass.lastArray[2] || IpClass.setgw != IpClass.lastArray[3])
@@ -922,6 +923,7 @@ namespace myipset
 
         private void DisplayHistoryRecord(string[] record)
         {
+            checkBoxDHCP.Checked = false;
             textBoxip1.Text = record[1];
             textBoxmask1.Text = record[2];
             textBoxgw.Text = record[3];
