@@ -73,6 +73,8 @@
             this.textBoxMTU = new System.Windows.Forms.TextBox();
             this.button_MTU = new System.Windows.Forms.Button();
             this.buttonChangeName = new System.Windows.Forms.Button();
+            this.buttonHistoryPrev = new System.Windows.Forms.Button();
+            this.buttonHistoryNext = new System.Windows.Forms.Button();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -318,9 +320,9 @@
             this.FangAn.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.FangAn.HorizontalScrollbar = true;
             this.FangAn.ItemHeight = 18;
-            this.FangAn.Location = new System.Drawing.Point(371, 189);
+            this.FangAn.Location = new System.Drawing.Point(371, 225);
             this.FangAn.Name = "FangAn";
-            this.FangAn.Size = new System.Drawing.Size(231, 382);
+            this.FangAn.Size = new System.Drawing.Size(231, 346);
             this.FangAn.TabIndex = 30;
             this.FangAn.SelectedIndexChanged += new System.EventHandler(this.FangAn_SelectedIndexChanged);
             this.FangAn.DoubleClick += new System.EventHandler(this.FangAn_DoubleClick);
@@ -389,7 +391,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label1.Location = new System.Drawing.Point(368, 162);
+            this.label1.Location = new System.Drawing.Point(375, 203);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(170, 18);
             this.label1.TabIndex = 32;
@@ -504,11 +506,35 @@
             this.buttonChangeName.UseVisualStyleBackColor = false;
             this.buttonChangeName.Click += new System.EventHandler(this.ButtonChangeName_Click);
             // 
+            // buttonHistoryPrev
+            // 
+            this.buttonHistoryPrev.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.buttonHistoryPrev.Location = new System.Drawing.Point(371, 155);
+            this.buttonHistoryPrev.Name = "buttonHistoryPrev";
+            this.buttonHistoryPrev.Size = new System.Drawing.Size(107, 36);
+            this.buttonHistoryPrev.TabIndex = 42;
+            this.buttonHistoryPrev.Text = "前一次";
+            this.buttonHistoryPrev.UseVisualStyleBackColor = true;
+            this.buttonHistoryPrev.Click += new System.EventHandler(this.ButtonHistoryPrev_Click);
+            // 
+            // buttonHistoryNext
+            // 
+            this.buttonHistoryNext.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.buttonHistoryNext.Location = new System.Drawing.Point(484, 155);
+            this.buttonHistoryNext.Name = "buttonHistoryNext";
+            this.buttonHistoryNext.Size = new System.Drawing.Size(115, 36);
+            this.buttonHistoryNext.TabIndex = 43;
+            this.buttonHistoryNext.Text = "后一次";
+            this.buttonHistoryNext.UseVisualStyleBackColor = true;
+            this.buttonHistoryNext.Click += new System.EventHandler(this.ButtonHistoryNext_Click);
+            // 
             // Form1
             // 
             this.AcceptButton = this.buttonapply;
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
             this.ClientSize = new System.Drawing.Size(1139, 661);
+            this.Controls.Add(this.buttonHistoryNext);
+            this.Controls.Add(this.buttonHistoryPrev);
             this.Controls.Add(this.buttonChangeName);
             this.Controls.Add(this.buttonMTU_self);
             this.Controls.Add(this.buttonMTU_restore);
@@ -601,6 +627,8 @@
         public System.Windows.Forms.TextBox textBoxMTU;
         private System.Windows.Forms.Button button_MTU;
         private System.Windows.Forms.Button buttonChangeName;
+        private System.Windows.Forms.Button buttonHistoryPrev;
+        private System.Windows.Forms.Button buttonHistoryNext;
     }
 }
 

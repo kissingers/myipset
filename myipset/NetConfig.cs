@@ -6,6 +6,9 @@ namespace myipset
 {
     public static class IpClass
     {
+        public static List<string[]> HistoryRecords = new List<string[]>();
+        public static int HistoryCurrentIndex = -1;
+
         public static bool UseDhcp = false;
         public static bool Use2Ip = false;
         public static bool lastUseDhcp = true;
@@ -25,7 +28,7 @@ namespace myipset
         public static string setip2 = "";
         public static string setmask2 = "";
         public static Dictionary<string, NetConfig> netConfigDict = null;
-        public static string[] lastArray = { "", "", "", "", "", "", "", "" };
+        public static string[] lastArray = new string[9];
         public static string configfile = "";
     }
 

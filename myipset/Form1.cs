@@ -27,7 +27,6 @@ namespace myipset
         {
             ShowAdapterInfo();
             NetWorkList();
-            Savelastip();
             ReadConfig();
         }
 
@@ -148,7 +147,7 @@ namespace myipset
         {
             if (comboBoxnet.SelectedValue == null)
             {
-                MessageBox.Show("请选择网卡下拉列表重新刷新，不存在网卡名: "+ comboBoxnet.Text);
+                MessageBox.Show("请选择网卡下拉列表重新刷新，不存在网卡名: " + comboBoxnet.Text);
                 return;
             }
 
@@ -666,6 +665,7 @@ namespace myipset
 
         public void ChangeUI()
         {
+            IpClass.HistoryCurrentIndex = -1;
             if (IpClass.Use2Ip)
             {
                 checkBox2IP.Checked = true;
@@ -844,9 +844,6 @@ namespace myipset
         public void ReadConfig()
         {
             FangAn.Items.Clear();
-            FangAn.Items.Add("自动获取地址");
-            FangAn.Items.Add("当前使用地址");
-            FangAn.Items.Add("上次使用地址");
 
             if (!File.Exists("config.cfg"))
             {
@@ -900,39 +897,12 @@ namespace myipset
 
         public void SelectFangAn()
         {
-            if (FangAn.Text == "自动获取地址")
-            {
-                IpClass.UseDhcp = true;
-                traceMessage.Items.Add("已选择网卡自动获取地址" + "\r\n");
-                traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
-                return;
-            }
-            if (FangAn.Text == "当前使用地址")
-            {
-                SelectNetCard();
-                traceMessage.Items.Add("已选择网卡当前使用地址" + "\r\n");
-                traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
-                return;
-            }
-            if (FangAn.Text == "上次使用地址")
-            {
-                IpClass.UseDhcp = IpClass.lastUseDhcp;
-                IpClass.Use2Ip = IpClass.lastUse2Ip;
-                textBoxip1.Text = IpClass.lastArray[1];
-                textBoxmask1.Text = IpClass.lastArray[2];
-                textBoxgw.Text = IpClass.lastArray[3];
-                textBoxdns1.Text = IpClass.lastArray[4];
-                textBoxdns2.Text = IpClass.lastArray[5];
-                textBoxip2.Text = IpClass.lastArray[6];
-                textBoxmask2.Text = IpClass.lastArray[7];
-                traceMessage.Items.Add("已选择网卡上次使用地址" + "\r\n");
-                traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
-                return;
-            }
+            string name = FangAn.Text;
 
-            if (!string.IsNullOrEmpty(FangAn.Text))
+            // 原有方案选择处理代码
+            if (!string.IsNullOrEmpty(name))
             {
-                NetConfig config = IpClass.netConfigDict[FangAn.Text];
+                NetConfig config = IpClass.netConfigDict[name];
                 IpClass.UseDhcp = false;
                 traceMessage.Items.Add("已选择" + config.Name + "\r\n");
                 traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
@@ -943,16 +913,56 @@ namespace myipset
                 textBoxdns2.Text = config.DNS2;
                 textBoxip2.Text = config.IP2;
                 textBoxmask2.Text = config.Mask2;
-                if (!string.IsNullOrEmpty(textBoxip2.Text) && !string.IsNullOrEmpty(textBoxmask2.Text)) IpClass.Use2Ip = true; else IpClass.Use2Ip = false;
+                if (!string.IsNullOrEmpty(textBoxip2.Text) && !string.IsNullOrEmpty(textBoxmask2.Text))
+                    IpClass.Use2Ip = true;
+                else
+                    IpClass.Use2Ip = false;
             }
+        }
+
+        private void DisplayHistoryRecord(string[] record)
+        {
+            textBoxip1.Text = record[1];
+            textBoxmask1.Text = record[2];
+            textBoxgw.Text = record[3];
+            textBoxdns1.Text = record[4];
+            textBoxdns2.Text = record[5];
+            textBoxip2.Text = record[6];
+            textBoxmask2.Text = record[7];
+
+            // 根据记录中的第二IP启用标记显示或隐藏第二IP的文本框
+            bool use2Ip = record[8] == "true";
+            if (use2Ip)
+            {
+                textBoxip2.Show();
+                textBoxmask2.Show();
+                labelip2.Show();
+                labelmask2.Show();
+                checkBox2IP.Checked = true;
+            }
+            else
+            {
+                textBoxip2.Hide();
+                textBoxmask2.Hide();
+                labelip2.Hide();
+                labelmask2.Hide();
+                checkBox2IP.Checked = false;
+            }
+
+            // 将记录显示为黄色高亮
+            Color highlightColor = Color.Yellow;
+            textBoxip1.BackColor = highlightColor;
+            textBoxmask1.BackColor = highlightColor;
+            textBoxgw.BackColor = highlightColor;
+            textBoxdns1.BackColor = highlightColor;
+            textBoxdns2.BackColor = highlightColor;
+            textBoxip2.BackColor = highlightColor;
+            textBoxmask2.BackColor = highlightColor;
         }
 
         public void UpdateFanganList()
         {
             FangAn.Items.Clear();
-            FangAn.Items.Add("自动获取地址");
-            FangAn.Items.Add("当前使用地址");
-            FangAn.Items.Add("上次使用地址");
             foreach (NetConfig config in IpClass.netConfigDict.Values)
             {
                 FangAn.Items.Add(config.Name);
@@ -968,8 +978,7 @@ namespace myipset
             foreach (NetworkInterface adapter in adapters)
             {
                 if (!(adapter.Name == comboBoxnet.SelectedValue.ToString()))
-                    continue;        //处理下拉列表,和前面读取的表项比较如果不匹配就继续匹配
-
+                    continue;
                 IPInterfaceProperties ip = adapter.GetIPProperties();
                 UnicastIPAddressInformationCollection netIpAdds = ip.UnicastAddresses;
                 GatewayIPAddressInformationCollection gatewayIpAdds = ip.GatewayAddresses;
@@ -977,16 +986,16 @@ namespace myipset
 
                 IpClass.lastUseDhcp = ip.GetIPv4Properties().IsDhcpEnabled;
 
-                //处理IP和掩码,最多2组IPv4
                 int index1 = 0;
                 Array.Clear(IpClass.lastArray, 0, IpClass.lastArray.Length);
                 foreach (UnicastIPAddressInformation ipadd in netIpAdds)
                 {
-                    if (ipadd.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork) //判断ipV4
+                    if (ipadd.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
                     {
-                        index1++;   //多个ip处理
+                        index1++;
                         if (index1 == 1)
                         {
+                            IpClass.lastUse2Ip = false;
                             IpClass.lastArray[1] = ipadd.Address.ToString();
                             IpClass.lastArray[2] = ipadd.IPv4Mask.ToString();
                         }
@@ -995,29 +1004,35 @@ namespace myipset
                             IpClass.lastUse2Ip = true;
                             IpClass.lastArray[6] = ipadd.Address.ToString();
                             IpClass.lastArray[7] = ipadd.IPv4Mask.ToString();
+                            IpClass.lastArray[8] = IpClass.Use2Ip ? "true" : "false";
                         }
                     }
                 }
 
-                //处理网关
                 foreach (GatewayIPAddressInformation gateway in gatewayIpAdds)
                 {
                     IpClass.lastArray[3] = gateway.Address.ToString();
                 }
 
-                //处理DNS服务器地址,最多2组
                 int index2 = 0;
                 foreach (IPAddress dns in dnsServers)
                 {
-                    if (dns.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork) //判断ipv4的dns
+                    if (dns.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
                     {
-                        index2++;   //多个dns处理
+                        index2++;
                         if (index2 == 1) IpClass.lastArray[4] = dns.ToString();
                         if (index2 == 2) IpClass.lastArray[5] = dns.ToString();
                     }
                 }
             }
             traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
+
+            // 保存本次记录到历史记录中
+            string[] currentRecord = new string[IpClass.lastArray.Length];
+            Array.Copy(IpClass.lastArray, currentRecord, IpClass.lastArray.Length);
+            IpClass.HistoryRecords.Add(currentRecord);
+            // 重置历史记录索引为默认 –1
+            IpClass.HistoryCurrentIndex = -1;
         }
 
         private void FangAn_SelectedIndexChanged(object sender, EventArgs e)
@@ -1132,7 +1147,7 @@ namespace myipset
         private void 删除ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             string name = FangAn.Text;
-            if (!string.IsNullOrEmpty(name) && name != "自动获取地址" && name != "当前使用地址" && name != "上次使用地址")
+            if (!string.IsNullOrEmpty(name))
             {
                 FangAn.Items.Remove(name);
                 IpClass.netConfigDict.Remove(name);
@@ -1261,10 +1276,68 @@ namespace myipset
 
         private void ButtonChangeName_Click(object sender, EventArgs e)
         {
-            string ChangeNameCommand = $"interface set interface name=\"{IpClass.NicName}\" newname=\"{comboBoxnet.Text}\""; 
+            string ChangeNameCommand = $"interface set interface name=\"{IpClass.NicName}\" newname=\"{comboBoxnet.Text}\"";
             traceMessage.Items.Add("netsh " + ChangeNameCommand);
             RunNetshCommand(ChangeNameCommand);
             NetWorkList();
+        }
+
+        private void ButtonHistoryPrev_Click(object sender, EventArgs e)
+        {
+            if (IpClass.HistoryRecords.Count == 0)
+            {
+                MessageBox.Show("还没有历史记录");
+                return;
+            }
+            // 如果处于默认状态，则设置为最老的历史记录
+            if (IpClass.HistoryCurrentIndex == -1)
+            {
+                IpClass.HistoryCurrentIndex = IpClass.HistoryRecords.Count - 1;
+                DisplayHistoryRecord(IpClass.HistoryRecords[IpClass.HistoryCurrentIndex]);
+                traceMessage.Items.Add("显示前一条历史记录");
+                traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
+            }
+            else if (IpClass.HistoryCurrentIndex > 0)
+            {
+                IpClass.HistoryCurrentIndex--;
+                DisplayHistoryRecord(IpClass.HistoryRecords[IpClass.HistoryCurrentIndex]);
+                traceMessage.Items.Add("显示前一条历史记录");
+                traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
+            }
+            else
+            {
+                MessageBox.Show("没有更多历史记录了");
+            }
+        }
+
+        private void ButtonHistoryNext_Click(object sender, EventArgs e)
+        {
+            if (IpClass.HistoryRecords.Count == 0)
+            {
+                MessageBox.Show("还没有历史记录");
+                return;
+            }
+            // 如果当前为默认状态，则提示已经是最新实际IP状态
+            if (IpClass.HistoryCurrentIndex == -1)
+            {
+                MessageBox.Show("已是实际IP状态");
+            }
+            else if (IpClass.HistoryCurrentIndex < IpClass.HistoryRecords.Count - 1)
+            {
+                IpClass.HistoryCurrentIndex++;
+                DisplayHistoryRecord(IpClass.HistoryRecords[IpClass.HistoryCurrentIndex]);
+                traceMessage.Items.Add("显示后一条历史记录");
+                traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
+            }
+            else if (IpClass.HistoryCurrentIndex == IpClass.HistoryRecords.Count - 1)
+            {
+                // 已经到最新历史记录，再点击则刷新为当前实际IP状态
+                IpClass.HistoryCurrentIndex = -1;  // 恢复到默认状态
+                SelectNetCard();
+                ChangeUI();
+                traceMessage.Items.Add("已刷新到当前实际IP状态");
+                traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
+            }
         }
     }
 }
