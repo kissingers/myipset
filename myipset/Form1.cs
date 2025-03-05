@@ -794,19 +794,19 @@ namespace myipset
             ManagementObjectCollection routeColl = isrouteClass.GetInstances();
             foreach (ManagementObject mor in routeColl.Cast<ManagementObject>())
             {
-                string routemessage = routemessage = mor["Destination"] + "\t";
+                string routemessage = mor["Destination"] + "\t";
                 if (mor["Destination"].ToString().Length < 8)
-                    routemessage = routemessage + "\t";
+                    routemessage += "\t";
 
-                routemessage = routemessage + mor["Mask"] + "\t";
+                routemessage += mor["Mask"] + "\t";
                 if (mor["Mask"].ToString().Length < 8)
-                    routemessage = routemessage + "\t";
+                    routemessage += "\t";
 
-                routemessage = routemessage + mor["NextHop"] + "\t";
+                routemessage += mor["NextHop"] + "\t";
                 if (mor["NextHop"].ToString().Length < 8)
-                    routemessage = routemessage + "\t";
+                    routemessage += "\t";
 
-                routemessage = routemessage + mor["InterfaceIndex"] + "\t" + mor["Metric1"];
+                routemessage += mor["InterfaceIndex"] + "\t" + mor["Metric1"];
                 traceMessage.Items.Add(routemessage);
             }
             traceMessage.Items.Add("-----------------------------------------------------------------");
@@ -1245,7 +1245,7 @@ namespace myipset
             }
         }
 
-        private void buttonMTU_restore_Click(object sender, EventArgs e)
+        private void ButtonMTU_restore_Click(object sender, EventArgs e)
         {
             string ipv4Command = $"interface ipv4 set subinterface \"{IpClass.NicName}\" mtu=1500 store=persistent";
             traceMessage.Items.Add("netsh " + ipv4Command);
@@ -1259,7 +1259,7 @@ namespace myipset
             ChangeUI();
         }
 
-        private void buttonChangeName_Click(object sender, EventArgs e)
+        private void ButtonChangeName_Click(object sender, EventArgs e)
         {
             string ChangeNameCommand = $"interface set interface name=\"{IpClass.NicName}\" newname=\"{comboBoxnet.Text}\""; 
             traceMessage.Items.Add("netsh " + ChangeNameCommand);

@@ -470,7 +470,7 @@
             this.buttonMTU_restore.TabIndex = 40;
             this.buttonMTU_restore.Text = "恢复默认";
             this.buttonMTU_restore.UseVisualStyleBackColor = true;
-            this.buttonMTU_restore.Click += new System.EventHandler(this.buttonMTU_restore_Click);
+            this.buttonMTU_restore.Click += new System.EventHandler(this.ButtonMTU_restore_Click);
             // 
             // textBoxMTU
             // 
@@ -502,7 +502,7 @@
             this.buttonChangeName.TabIndex = 41;
             this.buttonChangeName.Text = "改名";
             this.buttonChangeName.UseVisualStyleBackColor = false;
-            this.buttonChangeName.Click += new System.EventHandler(this.buttonChangeName_Click);
+            this.buttonChangeName.Click += new System.EventHandler(this.ButtonChangeName_Click);
             // 
             // Form1
             // 
