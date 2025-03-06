@@ -1339,6 +1339,7 @@ namespace myipset
                 ChangeUI();
                 traceMessage.Items.Add("已刷新到当前实际IP状态");
                 traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
+                MessageBox.Show("已是实际IP状态");
             }
         }
     }
