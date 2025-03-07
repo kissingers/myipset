@@ -531,6 +531,7 @@
             // buttonCallPing
             // 
             this.buttonCallPing.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.buttonCallPing.ForeColor = System.Drawing.Color.Blue;
             this.buttonCallPing.Location = new System.Drawing.Point(371, 158);
             this.buttonCallPing.Name = "buttonCallPing";
             this.buttonCallPing.Size = new System.Drawing.Size(107, 36);
