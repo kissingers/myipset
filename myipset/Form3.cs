@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Diagnostics;  // 新增引用
 
 namespace myipset
 {
@@ -200,6 +201,42 @@ namespace myipset
                     return;
                 }
             }
+
+            // 如果是同网段群ping，添加本机arp表中存在但未探测到的IP对应的MAC
+            if (sameNetwork)
+            {
+                var arpEntries = GetArpTableEntries();
+                foreach (var entry in arpEntries)
+                {
+                    // 检查该ARP表记录的IP是否属于当前 /24 网段
+                    if (entry.Key.StartsWith(prefix + "."))
+                    {
+                        // 检查是否已存在 DataGridViewMAC 中
+                        bool exists = false;
+                        foreach (DataGridViewRow row in DataGridViewMAC.Rows)
+                        {
+                            if (row.Cells[0].Value?.ToString() == entry.Key)
+                            {
+                                exists = true;
+                                break;
+                            }
+                        }
+                        if (!exists)
+                        {
+                            DataGridViewMAC.Rows.Add(entry.Key, entry.Value);
+                            // 修改 DataGridViewCping 中对应单元格背景色为粉红色
+                            string[] ipParts = entry.Key.Split('.');
+                            if (ipParts.Length == 4 && int.TryParse(ipParts[3], out int ipSuffix))
+                            {
+                                int rowIndex = ipSuffix / 16;
+                                int colIndex = ipSuffix % 16;
+                                DataGridViewCping.Rows[rowIndex].Cells[colIndex].Style.BackColor = Color.Fuchsia;
+                            }
+                        }
+                    }
+                }
+            }
+
             buttonStartPing.BackColor = SystemColors.Control;
             buttonStartPing.Text = "开始群ping";
             buttonStartPing.Enabled = true;
@@ -262,6 +299,53 @@ namespace myipset
             }
         }
 
+        /// <summary>
+        /// 运行arp -a命令并解析输出，返回一个以IP为键，MAC为值的字典
+        /// </summary>
+        /// <returns></returns>
+        private Dictionary<string, string> GetArpTableEntries()
+        {
+            Dictionary<string, string> entries = new Dictionary<string, string>();
+            try
+            {
+                ProcessStartInfo psi = new ProcessStartInfo("arp", "-a")
+                {
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+                using (var process = Process.Start(psi))
+                {
+                    string output = process.StandardOutput.ReadToEnd();
+                    process.WaitForExit();
+                    string[] lines = output.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (var line in lines)
+                    {
+                        // 如果该行包含MAC地址分隔符'-'
+                        if (line.Contains("-"))
+                        {
+                            var tokens = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                            if (tokens.Length >= 2)
+                            {
+                                string ip = tokens[0];
+                                string mac = tokens[1].Replace('-', ':').ToUpper();
+                                // 排除全FF的MAC地址
+                                if (mac == "FF:FF:FF:FF:FF:FF")
+                                    continue;
+
+                                entries[ip] = mac;
+                            }
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // 错误直接返回空字典
+            }
+            return entries;
+        }
+
         private void ButtonSaveMac_Click(object sender, EventArgs e)
         {
             using (SaveFileDialog sfd = new SaveFileDialog())
@@ -271,8 +355,6 @@ namespace myipset
                 if (sfd.ShowDialog() == DialogResult.OK)
                 {
                     StringBuilder sb = new StringBuilder();
-                    // CSV头部
-                    //sb.AppendLine("IP,MAC");
                     foreach (DataGridViewRow row in DataGridViewMAC.Rows)
                     {
                         if (!row.IsNewRow)

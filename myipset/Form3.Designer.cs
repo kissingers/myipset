@@ -42,6 +42,7 @@
             this.labelLG1000ms = new System.Windows.Forms.Label();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.buttonSaveMac = new System.Windows.Forms.Button();
+            this.labelDenyPing = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.DataGridViewCping)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.DataGridViewMAC)).BeginInit();
             this.SuspendLayout();
@@ -78,7 +79,7 @@
             this.buttonStartPing.BackColor = System.Drawing.SystemColors.Control;
             this.buttonStartPing.Font = new System.Drawing.Font("宋体", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.buttonStartPing.ForeColor = System.Drawing.Color.Blue;
-            this.buttonStartPing.Location = new System.Drawing.Point(12, 6);
+            this.buttonStartPing.Location = new System.Drawing.Point(11, 6);
             this.buttonStartPing.Name = "buttonStartPing";
             this.buttonStartPing.Size = new System.Drawing.Size(165, 33);
             this.buttonStartPing.TabIndex = 43;
@@ -134,7 +135,7 @@
             // 
             this.label100ms.AutoSize = true;
             this.label100ms.BackColor = System.Drawing.Color.Yellow;
-            this.label100ms.Location = new System.Drawing.Point(428, 15);
+            this.label100ms.Location = new System.Drawing.Point(430, 15);
             this.label100ms.Name = "label100ms";
             this.label100ms.Size = new System.Drawing.Size(55, 15);
             this.label100ms.TabIndex = 46;
@@ -144,7 +145,7 @@
             // 
             this.label1000ms.AutoSize = true;
             this.label1000ms.BackColor = System.Drawing.Color.Orange;
-            this.label1000ms.Location = new System.Drawing.Point(500, 15);
+            this.label1000ms.Location = new System.Drawing.Point(503, 15);
             this.label1000ms.Name = "label1000ms";
             this.label1000ms.Size = new System.Drawing.Size(63, 15);
             this.label1000ms.TabIndex = 47;
@@ -154,7 +155,7 @@
             // 
             this.labelLG1000ms.AutoSize = true;
             this.labelLG1000ms.BackColor = System.Drawing.Color.OrangeRed;
-            this.labelLG1000ms.Location = new System.Drawing.Point(580, 15);
+            this.labelLG1000ms.Location = new System.Drawing.Point(591, 15);
             this.labelLG1000ms.Name = "labelLG1000ms";
             this.labelLG1000ms.Size = new System.Drawing.Size(63, 15);
             this.labelLG1000ms.TabIndex = 48;
@@ -165,7 +166,7 @@
             this.buttonSaveMac.BackColor = System.Drawing.SystemColors.Control;
             this.buttonSaveMac.Font = new System.Drawing.Font("宋体", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.buttonSaveMac.ForeColor = System.Drawing.Color.Blue;
-            this.buttonSaveMac.Location = new System.Drawing.Point(666, 6);
+            this.buttonSaveMac.Location = new System.Drawing.Point(820, 6);
             this.buttonSaveMac.Name = "buttonSaveMac";
             this.buttonSaveMac.Size = new System.Drawing.Size(151, 33);
             this.buttonSaveMac.TabIndex = 49;
@@ -173,11 +174,22 @@
             this.buttonSaveMac.UseVisualStyleBackColor = false;
             this.buttonSaveMac.Click += new System.EventHandler(this.ButtonSaveMac_Click);
             // 
+            // labelDenyPing
+            // 
+            this.labelDenyPing.AutoSize = true;
+            this.labelDenyPing.BackColor = System.Drawing.Color.Fuchsia;
+            this.labelDenyPing.Location = new System.Drawing.Point(679, 15);
+            this.labelDenyPing.Name = "labelDenyPing";
+            this.labelDenyPing.Size = new System.Drawing.Size(99, 15);
+            this.labelDenyPing.TabIndex = 50;
+            this.labelDenyPing.Text = "同网段禁ping";
+            // 
             // Form3
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(981, 491);
+            this.Controls.Add(this.labelDenyPing);
             this.Controls.Add(this.buttonSaveMac);
             this.Controls.Add(this.labelLG1000ms);
             this.Controls.Add(this.label1000ms);
@@ -213,5 +225,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn IP;
         private System.Windows.Forms.DataGridViewTextBoxColumn MAC;
         private System.Windows.Forms.Button buttonSaveMac;
+        private System.Windows.Forms.Label labelDenyPing;
     }
 }
