@@ -264,7 +264,6 @@ namespace myipset
                 return false;
             }
 
-
             //处理第一组IP掩码和网关,有变化才改变,避免不必要的更改IP导致网络暂时中断
             if (IpClass.lastUseDhcp || IpClass.setip1 != IpClass.lastArray[1] || IpClass.setmask1 != IpClass.lastArray[2] || IpClass.setgw != IpClass.lastArray[3])
             {
@@ -338,51 +337,68 @@ namespace myipset
 
         public bool CheckIP(string ip)
         {
-            //第一位在1到223之间 1-9  10-99 100-199 200-219 220-223 第二位0-9 10-99 100--199 200-249 250-255
-            string pattrn = @"^([1-9]|[1-9]\d|1\d\d|2[0-1]\d|22[0-3])\.([0-9]|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.([0-9]|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.([0-9]|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])$";
-            if (System.Text.RegularExpressions.Regex.IsMatch(ip, pattrn))
+            // 尝试解析IP地址
+            if (!IPAddress.TryParse(ip, out IPAddress address))
             {
-                traceMessage.Items.Add("这是合法的IP网关DNS地址：" + ip);
-                return true;
-            }
-            else
-            {
-                traceMessage.Items.Add("这是非法的IP网关DNS地址,或去掉每一位最前面的0：" + ip);
+                traceMessage.Items.Add("无效的IP地址：" + ip);
                 return false;
             }
+            // 仅接受IPv4地址
+            if (address.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
+            {
+                traceMessage.Items.Add("无效的IPv4地址：" + ip);
+                return false;
+            }
+            // 判断第一段必须在1到223之间
+            byte[] bytes = address.GetAddressBytes();
+            if (bytes[0] < 1 || bytes[0] > 223)
+            {
+                traceMessage.Items.Add("IP地址首段必须在1到223之间：" + ip);
+                return false;
+            }
+            traceMessage.Items.Add("这是合法的IP网关DNS地址：" + ip);
+            return true;
         }
 
-        /// 验证子网掩码正确性,最后一个1后面应该是全0
+        // 验证子网掩码正确性,最后一个1后面应该是全0
         public bool CheckMask(string mask)
         {
-            string[] vList = mask.Split('.');
-            if (vList.Length != 4) return false;   //如果不是4组掩码就无效
-
-            int.TryParse(vList[0], out int m);   //如果掩码第一组是0就无效
-            if (m == 0) return false;
-
-            bool vZero = false; // 出现0标记为true
-            for (int j = 0; j < vList.Length; j++)
+            // 尝试解析子网掩码
+            if (!IPAddress.TryParse(mask, out IPAddress subnet))
             {
-                if (!int.TryParse(vList[j], out int i)) return false;    //没转成数字字符则无效
-                if ((i < 0) || (i > 255)) return false;              //超出范围则无效
-                if (vZero)
+                traceMessage.Items.Add("无效的网络掩码：" + mask);
+                return false;
+            }
+            // 仅接受IPv4掩码
+            if (subnet.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
+            {
+                traceMessage.Items.Add("无效的IPv4网络掩码：" + mask);
+                return false;
+            }
+
+            byte[] bytes = subnet.GetAddressBytes();
+            // 将4字节转为一个32位整数（大端序）
+            uint maskValue = ((uint)bytes[0] << 24) | ((uint)bytes[1] << 16) | ((uint)bytes[2] << 8) | ((uint)bytes[3]);
+            if (maskValue == 0)
+            {
+                traceMessage.Items.Add("无效的网络掩码，掩码不能全为0：" + mask);
+                return false;
+            }
+            // 检查掩码连续性：从最高位开始连续为1，后面必须全为0
+            bool foundZero = false;
+            for (int i = 31; i >= 0; i--)
+            {
+                if ((maskValue & (1u << i)) != 0)
                 {
-                    if (i != 0) return false;
+                    if (foundZero)
+                    {
+                        traceMessage.Items.Add("无效的网络掩码，掩码中1和0不连续：" + mask);
+                        return false;
+                    }
                 }
                 else
                 {
-                    for (int k = 7; k >= 0; k--)
-                    {
-                        if (((i >> k) & 1) == 0) // 出现0则标记已经有0
-                        {
-                            vZero = true;
-                        }
-                        else
-                        {
-                            if (vZero) return false; // 出现0后有非0位则无效
-                        }
-                    }
+                    foundZero = true;
                 }
             }
             traceMessage.Items.Add("这是合法的网络掩码 地址：" + mask);
@@ -489,7 +505,7 @@ namespace myipset
             }
 
             //如果ip1和网关不为空,或者ip2和网关不为空
-            if ((!string.IsNullOrEmpty(IpClass.setip1) && !string.IsNullOrEmpty(IpClass.setgw)) || (!string.IsNullOrEmpty(IpClass.setip2) && !string.IsNullOrEmpty(IpClass.setgw)))
+            if (!string.IsNullOrEmpty(IpClass.setgw) && (!string.IsNullOrEmpty(IpClass.setip1) || !string.IsNullOrEmpty(IpClass.setip2)))
             {
                 string Ip1BraodCheck = GetNetSegment(IpClass.setip1, IpClass.setmask1);
                 string Gw1BraodCheck = GetNetSegment(IpClass.setgw, IpClass.setmask1);
@@ -1341,6 +1357,15 @@ namespace myipset
                 traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
                 MessageBox.Show("已是实际IP状态");
             }
+        }
+
+        private void ButtonCallPing_Click(object sender, EventArgs e)
+        {
+            Form3 form3 = new Form3
+            {
+                Owner = this // 'this' should be an instance of Form1
+            };
+            form3.Show();
         }
     }
 }

@@ -75,6 +75,7 @@
             this.buttonChangeName = new System.Windows.Forms.Button();
             this.buttonHistoryPrev = new System.Windows.Forms.Button();
             this.buttonHistoryNext = new System.Windows.Forms.Button();
+            this.buttonCallPing = new System.Windows.Forms.Button();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -298,7 +299,7 @@
             this.buttonnicenable.Name = "buttonnicenable";
             this.buttonnicenable.Size = new System.Drawing.Size(67, 37);
             this.buttonnicenable.TabIndex = 23;
-            this.buttonnicenable.Text = "默认";
+            this.buttonnicenable.Text = "启禁";
             this.buttonnicenable.UseVisualStyleBackColor = false;
             this.buttonnicenable.Click += new System.EventHandler(this.Buttonnicenable_Click);
             // 
@@ -318,11 +319,10 @@
             // 
             this.FangAn.ContextMenuStrip = this.contextMenuStrip1;
             this.FangAn.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.FangAn.HorizontalScrollbar = true;
             this.FangAn.ItemHeight = 18;
-            this.FangAn.Location = new System.Drawing.Point(371, 225);
+            this.FangAn.Location = new System.Drawing.Point(371, 243);
             this.FangAn.Name = "FangAn";
-            this.FangAn.Size = new System.Drawing.Size(231, 346);
+            this.FangAn.Size = new System.Drawing.Size(228, 328);
             this.FangAn.TabIndex = 30;
             this.FangAn.SelectedIndexChanged += new System.EventHandler(this.FangAn_SelectedIndexChanged);
             this.FangAn.DoubleClick += new System.EventHandler(this.FangAn_DoubleClick);
@@ -384,18 +384,18 @@
             this.traceMessage.ItemHeight = 15;
             this.traceMessage.Location = new System.Drawing.Point(617, 26);
             this.traceMessage.Name = "traceMessage";
-            this.traceMessage.Size = new System.Drawing.Size(510, 604);
+            this.traceMessage.Size = new System.Drawing.Size(510, 619);
             this.traceMessage.TabIndex = 31;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label1.Location = new System.Drawing.Point(375, 203);
+            this.label1.Location = new System.Drawing.Point(368, 218);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(170, 18);
+            this.label1.Size = new System.Drawing.Size(113, 18);
             this.label1.TabIndex = 32;
-            this.label1.Text = "默认及保存的方案:";
+            this.label1.Text = "保存的方案:";
             // 
             // buttonMAC_Random
             // 
@@ -421,9 +421,9 @@
             // buttonMAC_restore
             // 
             this.buttonMAC_restore.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.buttonMAC_restore.Location = new System.Drawing.Point(470, 64);
+            this.buttonMAC_restore.Location = new System.Drawing.Point(484, 64);
             this.buttonMAC_restore.Name = "buttonMAC_restore";
-            this.buttonMAC_restore.Size = new System.Drawing.Size(129, 36);
+            this.buttonMAC_restore.Size = new System.Drawing.Size(115, 36);
             this.buttonMAC_restore.TabIndex = 35;
             this.buttonMAC_restore.Text = "恢复默认";
             this.buttonMAC_restore.UseVisualStyleBackColor = true;
@@ -446,7 +446,7 @@
             this.buttonMAC_Self.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.buttonMAC_Self.Location = new System.Drawing.Point(371, 64);
             this.buttonMAC_Self.Name = "buttonMAC_Self";
-            this.buttonMAC_Self.Size = new System.Drawing.Size(91, 36);
+            this.buttonMAC_Self.Size = new System.Drawing.Size(107, 36);
             this.buttonMAC_Self.TabIndex = 35;
             this.buttonMAC_Self.Text = "手动MAC";
             this.buttonMAC_Self.UseVisualStyleBackColor = true;
@@ -457,7 +457,7 @@
             this.buttonMTU_self.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.buttonMTU_self.Location = new System.Drawing.Point(371, 107);
             this.buttonMTU_self.Name = "buttonMTU_self";
-            this.buttonMTU_self.Size = new System.Drawing.Size(91, 36);
+            this.buttonMTU_self.Size = new System.Drawing.Size(107, 36);
             this.buttonMTU_self.TabIndex = 39;
             this.buttonMTU_self.Text = "手动MTU";
             this.buttonMTU_self.UseVisualStyleBackColor = true;
@@ -466,9 +466,9 @@
             // buttonMTU_restore
             // 
             this.buttonMTU_restore.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.buttonMTU_restore.Location = new System.Drawing.Point(470, 107);
+            this.buttonMTU_restore.Location = new System.Drawing.Point(484, 107);
             this.buttonMTU_restore.Name = "buttonMTU_restore";
-            this.buttonMTU_restore.Size = new System.Drawing.Size(129, 36);
+            this.buttonMTU_restore.Size = new System.Drawing.Size(115, 36);
             this.buttonMTU_restore.TabIndex = 40;
             this.buttonMTU_restore.Text = "恢复默认";
             this.buttonMTU_restore.UseVisualStyleBackColor = true;
@@ -509,30 +509,42 @@
             // buttonHistoryPrev
             // 
             this.buttonHistoryPrev.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.buttonHistoryPrev.Location = new System.Drawing.Point(371, 155);
+            this.buttonHistoryPrev.Location = new System.Drawing.Point(484, 158);
             this.buttonHistoryPrev.Name = "buttonHistoryPrev";
-            this.buttonHistoryPrev.Size = new System.Drawing.Size(107, 36);
+            this.buttonHistoryPrev.Size = new System.Drawing.Size(115, 36);
             this.buttonHistoryPrev.TabIndex = 42;
-            this.buttonHistoryPrev.Text = "前一次";
+            this.buttonHistoryPrev.Text = "前一次IP";
             this.buttonHistoryPrev.UseVisualStyleBackColor = true;
             this.buttonHistoryPrev.Click += new System.EventHandler(this.ButtonHistoryPrev_Click);
             // 
             // buttonHistoryNext
             // 
             this.buttonHistoryNext.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.buttonHistoryNext.Location = new System.Drawing.Point(484, 155);
+            this.buttonHistoryNext.Location = new System.Drawing.Point(484, 200);
             this.buttonHistoryNext.Name = "buttonHistoryNext";
             this.buttonHistoryNext.Size = new System.Drawing.Size(115, 36);
             this.buttonHistoryNext.TabIndex = 43;
-            this.buttonHistoryNext.Text = "后一次";
+            this.buttonHistoryNext.Text = "后一次IP";
             this.buttonHistoryNext.UseVisualStyleBackColor = true;
             this.buttonHistoryNext.Click += new System.EventHandler(this.ButtonHistoryNext_Click);
+            // 
+            // buttonCallPing
+            // 
+            this.buttonCallPing.Font = new System.Drawing.Font("宋体", 10.64348F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.buttonCallPing.Location = new System.Drawing.Point(371, 158);
+            this.buttonCallPing.Name = "buttonCallPing";
+            this.buttonCallPing.Size = new System.Drawing.Size(107, 36);
+            this.buttonCallPing.TabIndex = 44;
+            this.buttonCallPing.Text = "Cping工具";
+            this.buttonCallPing.UseVisualStyleBackColor = true;
+            this.buttonCallPing.Click += new System.EventHandler(this.ButtonCallPing_Click);
             // 
             // Form1
             // 
             this.AcceptButton = this.buttonapply;
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
             this.ClientSize = new System.Drawing.Size(1139, 661);
+            this.Controls.Add(this.buttonCallPing);
             this.Controls.Add(this.buttonHistoryNext);
             this.Controls.Add(this.buttonHistoryPrev);
             this.Controls.Add(this.buttonChangeName);
@@ -629,6 +641,7 @@
         private System.Windows.Forms.Button buttonChangeName;
         private System.Windows.Forms.Button buttonHistoryPrev;
         private System.Windows.Forms.Button buttonHistoryNext;
+        private System.Windows.Forms.Button buttonCallPing;
     }
 }
 
