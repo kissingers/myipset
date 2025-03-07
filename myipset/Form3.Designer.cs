@@ -166,11 +166,11 @@
             this.buttonSaveMac.BackColor = System.Drawing.SystemColors.Control;
             this.buttonSaveMac.Font = new System.Drawing.Font("宋体", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.buttonSaveMac.ForeColor = System.Drawing.Color.Blue;
-            this.buttonSaveMac.Location = new System.Drawing.Point(820, 6);
+            this.buttonSaveMac.Location = new System.Drawing.Point(808, 6);
             this.buttonSaveMac.Name = "buttonSaveMac";
-            this.buttonSaveMac.Size = new System.Drawing.Size(151, 33);
+            this.buttonSaveMac.Size = new System.Drawing.Size(163, 33);
             this.buttonSaveMac.TabIndex = 49;
-            this.buttonSaveMac.Text = "保存MAC地址";
+            this.buttonSaveMac.Text = "保存IP-MAC地址";
             this.buttonSaveMac.UseVisualStyleBackColor = false;
             this.buttonSaveMac.Click += new System.EventHandler(this.ButtonSaveMac_Click);
             // 
