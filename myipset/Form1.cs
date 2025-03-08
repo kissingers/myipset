@@ -807,7 +807,7 @@ namespace myipset
         public void ShowRoute()
         {
             traceMessage.Items.Add("-------------------------------------------------------");
-            traceMessage.Items.Add("目的地址\t\t掩码\t\t下一跳\t\t接口\t代价");
+            traceMessage.Items.Add("目的地址  \t掩码\t\t下一跳\t\t接口\t代价");
             ManagementClass isrouteClass = new ManagementClass("Win32_IP4RouteTable");
             ManagementObjectCollection routeColl = isrouteClass.GetInstances();
             foreach (ManagementObject mor in routeColl.Cast<ManagementObject>())
