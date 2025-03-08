@@ -18,6 +18,7 @@ namespace myipset
     {
         public Form1()
         {
+            //AutoScaleMode = AutoScaleMode.Dpi;
             InitializeComponent();
             IpClass.netConfigDict = new Dictionary<string, NetConfig>();
             StartPosition = FormStartPosition.CenterScreen;        //程序居中
@@ -93,7 +94,7 @@ namespace myipset
             {
                 //显示网络适配器描述信息、名称、类型、速度、MAC 地址
                 index++;
-                traceMessage.Items.Add("------------------------第" + index + "个适配器信息------------------------");
+                traceMessage.Items.Add("--------------------第" + index + "个适配器信息--------------------");
                 traceMessage.Items.Add("网卡名字：" + adapter.Name);
                 traceMessage.Items.Add("网卡描述：" + adapter.Description);
                 traceMessage.Items.Add("网卡标识：" + adapter.Id);
@@ -138,7 +139,7 @@ namespace myipset
                         traceMessage.Items.Add("IPV6域名：" + dns);
                 }
             }
-            traceMessage.Items.Add("-----------------------适配器信息输出结束-------------------------");
+            traceMessage.Items.Add("-------------------适配器信息输出结束---------------------");
             traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
         }
 
@@ -242,7 +243,7 @@ namespace myipset
                 traceMessage.Items.Add("netsh interface ip set dns name=\"" + IpClass.NicName + "\" source=dhcp");
                 RunNetshCommand("interface ip set address name=\"" + IpClass.NicName + "\" source=dhcp");
                 RunNetshCommand("interface ip set dns name=\"" + IpClass.NicName + "\" source=dhcp");
-                traceMessage.Items.Add("-----------------修改网卡动态获取地址结束-------------------\r\n");
+                traceMessage.Items.Add("-------------修改网卡动态获取地址结束---------------\r\n");
                 SelectNetCard();
                 ChangeUI();
                 traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
@@ -259,7 +260,7 @@ namespace myipset
             //不是动态则检查IP是否合法，不合法直接退出
             if (!Checkinput())
             {
-                traceMessage.Items.Add("----------------需要修改的IP不符合规范,更改IP不成功----------------\r\n");
+                traceMessage.Items.Add("-----------需要修改的IP不符合规范,更改IP不成功-----------\r\n");
                 traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
                 return false;
             }
@@ -328,7 +329,7 @@ namespace myipset
                     RunNetshCommand(DNS2Command);
                 }
             }
-            traceMessage.Items.Add("---------------------修改网卡结束-----------------------\r\n");
+            traceMessage.Items.Add("---------------修改网卡结束-----------------\r\n");
             SelectNetCard();
             ChangeUI();
             traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
@@ -805,7 +806,7 @@ namespace myipset
         //显示当前路由表
         public void ShowRoute()
         {
-            traceMessage.Items.Add("-----------------------------------------------------------------");
+            traceMessage.Items.Add("-------------------------------------------------------");
             traceMessage.Items.Add("目的地址\t\t掩码\t\t下一跳\t\t接口\t代价");
             ManagementClass isrouteClass = new ManagementClass("Win32_IP4RouteTable");
             ManagementObjectCollection routeColl = isrouteClass.GetInstances();
@@ -826,7 +827,7 @@ namespace myipset
                 routemessage += mor["InterfaceIndex"] + "\t" + mor["Metric1"];
                 traceMessage.Items.Add(routemessage);
             }
-            traceMessage.Items.Add("-----------------------------------------------------------------");
+            traceMessage.Items.Add("-------------------------------------------------------");
             traceMessage.SelectedIndex = traceMessage.Items.Count - 1;
         }
 
